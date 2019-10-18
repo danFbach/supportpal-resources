@@ -1,0 +1,56 @@
+{% extends parent_template %}
+
+{% block sidebar %}
+    {% include 'operator.' ~ template ~ '.sidebar-settings' %}
+{% endblock %}
+
+{% block title %}
+    {{ Lang.choice('core.ip_ban', 2) }}
+{% endblock %}
+
+{% block content %}
+
+	<div class="success box delete hide">
+        {{ Lang.get('messages.success_deleted', { 'item': Lang.choice('core.ip_ban', 2) }) }}
+    </div>
+    <div class="fail box delete hide">
+        {{ Lang.get('messages.error_deleted', { 'item': Lang.choice('core.ip_ban', 2) }) }}
+    </div>
+
+	<div class="grid-options options box">
+	    <a href="{{ route('core.operator.ipban.create') }}">
+	        <i class="fa fa-plus"></i>&nbsp; {{ Lang.get('general.add_item', {'item': Lang.choice('core.ip_ban', 1)}) }}
+	    </a>
+        &nbsp;&nbsp;
+        <a class="filter-results">
+            <i class="fa fa-filter"></i>&nbsp; {{ Lang.get('general.filter_results') }}
+        </a>
+
+        <div class="filters hide">
+            <div>
+                <label>{{ Lang.get("general.ip") }}:</label>
+                <div id="filter_ip"></div>
+            </div>
+        </div>
+	</div>
+
+	{{ table.render()|raw }}
+	{{ table.script()|raw }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+
+    <!-- Filter the table -->
+    <script type="text/javascript">
+        $(document).ready(function() {
+            /**
+             * Initialise the filters
+             */
+            oTable.yadcf([
+                {column_number : 1, column_data_type: "text", filter_container_id: "filter_ip", filter_type: "text", filter_delay: 500},
+            ]);
+        });
+    </script>
+{% endblock %}

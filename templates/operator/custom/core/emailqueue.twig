@@ -1,0 +1,107 @@
+{% extends parent_template %}
+
+{% block title %}
+    {{ Lang.get('core.email_queue') }}
+{% endblock %}
+
+{% block description %}
+    {{ Lang.get('core.email_queue_desc') }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="success box sent-email hide">
+        {{ Lang.get('messages.sent_email') }}
+    </div>
+
+    <div class="grid-options options box">
+        <a class="filter-results">
+            <i class="fa fa-filter"></i>&nbsp; {{ Lang.get('general.filter_results') }}
+        </a>
+
+        <div class="filters hide">
+        	<div>
+                <label>{{ Lang.get('general.date') }}:</label>
+                <div>
+                    {{ form_text('sSearch_0_start', null, { 'class': 'datepicker', 'placeholder': '&#xf073; &nbsp;' ~ Lang.get('general.start_date'), 'size': 14 }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                    &nbsp;{{ Lang.get('general.to') }}&nbsp;
+                    {{ form_text('sSearch_0_end', null, { 'class': 'datepicker', 'placeholder': '&#xf073; &nbsp;' ~ Lang.get('general.end_date'), 'size': 14 }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.choice('general.recipients', 2) }}:</label>
+                <div>
+                	{{ form_text('sSearch_1', null, { 'placeholder': Lang.get('general.type_to_filter') }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.get('ticket.from_name') }}:</label>
+                <div>
+                	{{ form_text('sSearch_2', null, { 'placeholder': Lang.get('general.type_to_filter') }) }}{{ form_button('x', { 'class':  'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.get('ticket.from_address') }}:</label>
+                <div>
+                	{{ form_text('sSearch_3', null, { 'placeholder': Lang.get('general.type_to_filter') }) }}{{ form_button('x', { 'class':  'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.get('ticket.subject') }}:</label>
+                <div>
+                	{{ form_text('sSearch_4', null, { 'placeholder': Lang.get('general.type_to_filter') }) }}{{ form_button('x', { 'class':  'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.choice('general.message', 1) }}:</label>
+                <div>
+                	{{ form_text('sSearch_5', null, { 'placeholder': Lang.get('general.type_to_filter') }) }}{{ form_button('x', { 'class':  'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.choice('general.status', 1) }}:</label>
+                <div>
+                    {{ form_select('sSearch_6', { '-1': Lang.get('general.select_value'), 0: Lang.get('general.pending'), 1: Lang.get('general.blocked') }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                </div>
+            </div>
+        </div>
+	</div>
+
+	{{ table.render()|raw }}
+	{{ table.script()|raw }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/queryfiltering.js') }}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $(document).on('click', '.send-button', function () {
+                $.get('{{ route('core.operator.emailqueue.send') }}', { 'id[]': [ $(this).data('id') ] })
+                    .done(function () {
+                        $('.sent-email.box').show(500).delay(5000).hide(500);
+                        $('.dataTable').dataTable()._fnAjaxUpdate();
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        var message = '{{ Lang.get('log.email_send_failed') }}';
+                        try {
+                            var json = JSON.parse(jqXHR.responseText);
+                            if (typeof json.message !== 'undefined') {
+                                message = '<br />' + $('<div/>').text(json.message).html();
+                            }
+                        } catch (e) {
+                            // Invalid json.
+                        }
+
+                        swal({
+                            title: '{{ Lang.get('messages.error')  }}',
+                            html: message,
+                            type: 'error'
+                        });
+                    });
+            });
+        });
+    </script>
+{% endblock %}

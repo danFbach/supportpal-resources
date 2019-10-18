@@ -1,0 +1,94 @@
+{% extends parent_template %}
+
+{% block title %}
+    {{ Lang.choice('selfservice.comment', 2) }}
+{% endblock %}
+
+{% block breadcrumb %}
+    {{ Lang.get('selfservice.selfservice') }}
+    &nbsp;&nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i>&nbsp;&nbsp;
+    <strong>{{ Lang.choice('selfservice.comment', 2) }}</strong>
+{% endblock %}
+
+{% block content %}
+	<div class="success box update hide">
+        {{ Lang.get('messages.success_updated', { 'item': mb_strtolower(Lang.choice('selfservice.comment', 1), 'UTF-8') }) }}
+    </div>
+    <div class="fail box update hide">
+        {{ Lang.get('messages.error_updated', { 'item': mb_strtolower(Lang.choice('selfservice.comment', 1), 'UTF-8') }) }}
+    </div>
+
+    <div class="options box">
+        <a class="filter-results">
+            <i class="fa fa-filter"></i>&nbsp; {{ Lang.get('general.filter_results') }}
+        </a>
+
+        <div class="filters hide">
+            <div>
+                <label>{{ Lang.get('general.by')|capitalize }}:</label>
+                <div id="filter_by"></div>
+            </div>
+            <div>
+                <label>{{ Lang.choice('selfservice.article', 1) }}:</label>
+                <div id="filter_article"></div>
+            </div>
+            <div>
+                <label>{{ Lang.choice('selfservice.type', 1) }}:</label>
+                <div id="filter_type"></div>
+            </div>
+            <div>
+                <label>{{ Lang.choice('core.brand', 1) }}:</label>
+                <div id="filter_brand"></div>
+            </div>
+        </div>
+    </div>
+
+    {{ table.render()|raw }}
+    {{ table.script()|raw }}
+{% endblock %}
+
+{% block scripts_footer %}
+    <!-- Delete records from the table -->
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+
+    <!-- Filter the table -->
+
+    <script type="text/javascript">
+		$(document).ready(function() {
+			// Update status of comment
+			$(document.body).on('change', '.update-status', function() {
+				var $this = $(this);
+				// Post updated data
+		        $.post(
+					laroute.route("selfservice.operator.comment.updateStatus", { id: $this.parents('tr').attr('id') }),
+		            { status: $this.val() },
+		        function(response) {
+		            if (response.status == 'success') {
+		                $('.update.success').show(500).delay(5000).hide(500);
+		            } else {
+		                $('.update.fail').show(500).delay(5000).hide(500);
+		            }
+		        }, "json").fail(function() {
+		            $('.update.fail').show(500).delay(5000).hide(500);
+		        }).always(function() {
+		            $('.dataTable').dataTable()._fnAjaxUpdate();
+		        });
+			});
+            
+            /**
+             * Initialise the filters
+             */
+            oTable.yadcf([
+                {column_number : 0, column_data_type: "text", filter_container_id: "filter_by", filter_type: "text", filter_delay: 500},
+                {column_number : 1, column_data_type: "text", filter_container_id: "filter_article", filter_type: "text", filter_delay: 500},
+                {column_number : 2, column_data_type: "html", html_data_type: "selector", html_data_selector: "a", filter_container_id: "filter_type"},
+                {column_number : 3, column_data_type: "html", html_data_type: "selector", html_data_selector: "a", filter_container_id: "filter_brand"},
+            ]);
+
+            // Open links (not anchors) in a new window/tab
+            $(document).on('click', '.dataTable .child a', function() {
+                $(this).attr('target', '_blank');
+            });
+        });
+    </script>
+{% endblock %}

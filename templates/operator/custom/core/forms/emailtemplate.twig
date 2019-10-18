@@ -1,0 +1,123 @@
+{% extends parent_template %}
+
+{% block sidebar %}
+    {% include 'operator.' ~ template ~ '.sidebar-settings' %}
+{% endblock %}
+
+{% block title %}
+    {% if record|default is not empty and record.exists %}
+        {{ Lang.get('general.edit_item', {'item': Lang.choice('core.email_template', 1)}) }}
+    {% else %}
+        {{ Lang.get('general.add_item', {'item': Lang.choice('core.email_template', 1)}) }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+    {% if record|default is not empty and record.exists %}
+        {{ form_model(record, { 'route': [ 'core.operator.emailtemplate.update', record.id ], 'method': 'PUT', 'class': 'validate', 'style': 'min-height: 300px;', 'data-template-id': record.id }) }}
+    {% else %}
+        {{ form_open({ 'route': 'core.operator.emailtemplate.store', 'class': 'validate', 'style': 'min-height: 300px;' }) }}
+    {% endif %}
+
+        <div class="form-container open first">
+
+            <div class="form-row">
+                {{ form_label('name', Lang.get('general.name')) }}
+                <div class="input-container translatable small-translatable">
+                    {{ form_translatable_text(record, 'name', null, {'autofocus': 'autofocus'}) }}
+                </div>
+            </div>
+
+            <div class="form-row form-full">
+                {{ form_label('description', Lang.get('general.description')) }}
+                <div class="input-container translatable">
+                    {{ form_translatable_text(record, 'description') }}
+                </div>
+            </div>
+
+        </div>
+
+        <div id="sectionWrapper">
+
+            <h2>{{ Lang.get('core.email_content') }}</h2>
+            <h2 class="description">{{ Lang.get('core.email_content_desc') }}</h2>
+
+            <ul class="tabs" style="margin: 0; {% if brands|length == 1 %}display: none;{% endif %}">
+                {% for brand in brands %}
+                    <li id="{{ brand.id }}" {% if loop.first %}class="active"{% endif %}>
+                        {{ brand.name }}
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {% for brand in brands %}
+                <div id="tab{{ brand.id }}" class="tabContent {% if not loop.first %}hide{% endif %}">
+                    {# Add an empty item, we use this for DOM cloning when adding new records #}
+                    {% include 'operator.' ~ template ~ '.core.forms.emailtemplatedata' with { 'hide': true, 'brand': brand } %}
+
+                    <div class="section-items">
+                        {% for language_code, email_template in brand.templates %}
+                            {% include 'operator.' ~ template ~ '.core.forms.emailtemplatedata' with { 'brand': brand } %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-container open {% if not brand.languages|length %}hide{% endif %}">
+                        <div class="form-row small-selectize">
+                            <div class="input-container">
+                                <select name="brand[{{ brand.id }}][language]" title="{{ Lang.get('core.add_another_language') }}" class="add-item-selectize">
+                                    <option></option>
+                                    {% for code, name in brand.languages %}
+                                        <option value="{{ code }}">{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="form-button">
+            {{ form_submit(Lang.choice("general.submit", 1)) }}
+        </div>
+
+    {{ form_close() }}
+
+    <br />
+
+{% endblock %}
+
+{% block scripts_footer %}
+    {% if jsValidator|default is not empty %}
+        {{ jsValidator|raw }}
+    {% endif %}
+
+    <!-- Translatable.js dependencies: Selectize -->
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/translatable.js') }}"></script>
+
+    <!-- Redactor -->
+    <script src="{{ asset_rev('resources/assets/libs/editor.min.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/general/js/redactor_config.js') }}"></script>
+
+    <!-- Code Editor -->
+    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/operator/css/codeeditor.css') }}" />
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/redactor/codeeditor.js') }}"></script>
+
+    <script src="{{ asset_rev('resources/assets/operator/js/redactor/mergefields.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/operator/js/multidimensionaldata.js') }}"></script>
+    <script type="text/javascript">
+        var opts = {
+            syntaxEmailTemplate: true,
+            mergeFields: {
+                tickets: {{ isModuleEnabled('Ticket') ? "true" : "false" }},
+                organisations: "{{ Config.get('settings.organisations_enabled', 1) }}"
+            },
+            plugins: ['syntax', 'imagemanager', 'table', 'video', 'fontcolor', 'fontfamily', 'fontsize', 'mergeFields']
+        };
+
+        // Do not initialise redactor on the dummy DOM element.
+        $('div.section-items textarea').redactor($.extend($.Redactor.default_opts, opts));
+    </script>
+{% endblock %}

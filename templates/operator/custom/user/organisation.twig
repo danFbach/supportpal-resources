@@ -1,0 +1,62 @@
+{% extends parent_template %}
+
+{% block title %}
+    {% if title|default is not empty %}
+        {{ title }}
+    {% else %}
+        {{ Lang.choice("user.organisation", 2) }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+    {% if customSearch %}
+        {% include 'operator.' ~ template ~ '.core.search_tabs' %}
+    {% endif %}
+
+	<div class="success box delete hide">
+        {{ Lang.get('messages.success_deleted', { 'item': mb_strtolower(Lang.choice('user.organisation', 1), 'UTF-8') }) }}
+    </div>
+    <div class="fail box delete hide">
+        {{ Lang.get('messages.error_deleted', { 'item': mb_strtolower(Lang.choice('user.organisation', 1), 'UTF-8') }) }}
+    </div>
+
+	<div class="grid-options options box">
+	    <a href="{{ route('user.operator.organisation.create') }}" id="createOrganisation">
+	        <i class="fa fa-plus"></i>&nbsp; {{ Lang.get('general.add_item', {'item': Lang.choice('user.organisation', 1)}) }}
+	    </a>
+	    &nbsp;&nbsp;
+        <a class="toggle-filtering">
+            <i class="fa fa-filter"></i>&nbsp;
+            {{ Lang.get('general.filter_results') }}
+        </a>
+
+        {% include 'operator.' ~ template ~ '.ticket.forms.gridfiltering' %}
+	</div>
+
+	{{ table.render()|raw }}
+	{{ table.script()|raw }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+	<script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/filtering.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/operator/css/filtering.css') }}">
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            // Filtering
+            $('.update-filtering').on('click', function() {
+                $('.dataTable').on('preXhr.dt', function ( e, settings, data ) {
+                    // Add conditions to parameters
+                    var conditions = $(".conditiongroup").serializeArray();
+                    $.each(conditions, function(index, value) {
+                        data[value.name] = value.value;
+                    });
+                }).dataTable().api().ajax.reload();
+            });
+        });
+    </script>
+{% endblock %}

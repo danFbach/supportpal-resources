@@ -1,0 +1,112 @@
+    {{ View.fireHook('frontend.content_end') }}
+
+</div>
+
+<div id="desk_sidebar" class="right">
+    {{ View.fireHook('frontend.sidebar_start') }}
+
+    {% if auth_check() %}
+        <div class="desk_box account">
+            <img class="avatar left" src="{{ auth_user().avatar_url }}" />
+                    <span class="name">
+                        <strong>{{ auth_user().formatted_name }}</strong>
+                    </span>
+            <br />
+            <a href="{{ route('user.logout') }}">
+                <i class="fa fa-sign-out"></i>
+                {{ Lang.get('user.logout') }}
+            </a>
+        </div>
+    {% endif %}
+
+    {% block sidebar %}
+
+        <div class="desk_box">
+            <h2>{{ Lang.get('general.navigation') }}</h2>
+            {% include 'frontend.' ~ template ~ '.navigation' with { 'mobile': false } %}
+        </div>
+
+        {% if not auth_check() %}
+            <div class="desk_box">
+                <h2>{{ Lang.get('user.login') }}</h2>
+
+                {% set guard = SamlAuth.frontendGuard(current_brand(false)) %}
+                {% if SamlAuth.exists(guard) and not SamlAuth.guard(guard).isDualLogin() %}
+                    <input type="button" class="saml" onclick="location.href='{{ route('frontend.saml_login') }}';"
+                           value="{{ Lang.get('user.login_via', {'provider': Lang.get('user.idp')}) }}" />
+                {% else %}
+                    {{ form_open({ 'route': 'user.login', 'method': 'post' }) }}
+
+                    {{ form_hidden('back', intended_url|default is not empty ? intended_url : Request.url()) }}
+
+                    {{ form_text('email', null, {'placeholder' : Lang.get('general.email')}) }}
+                    {{ form_password('password', {'placeholder' : Lang.get('general.password')}) }}
+
+                    <div class="left" style="margin-top:4px;">
+                        {{ form_check('remember_me', '1') }} &nbsp; {{ form_label('remember_me', Lang.get('user.remember_me')) }}
+                    </div>
+
+                    {{ form_submit(Lang.get('user.login'), { 'class': 'right' }) }}
+
+                    <div class="clear"></div>
+
+                    <div style="line-height: 25px; text-align:center; padding-top:17px;">
+                        <a href="{{ route('user.reset') }}">{{ Lang.get('user.forgot_password') }}</a><br />
+                        {% if Config.get('settings.registration_enabled') == 1 %}
+                            <a href="{{ route('user.register') }}">{{ Lang.get('user.register_now') }}</a>
+                        {% endif %}
+
+                        {% if SamlAuth.exists(guard) %}
+                            <div class="strike">
+                                <span>{{ Lang.get('general.or') }}</span>
+                            </div>
+                            <input type="button" class="saml" onclick="location.href='{{ route('frontend.saml_login') }}';"
+                                   value="{{ Lang.get('user.login_via', {'provider': Lang.get('user.idp')}) }}" />
+                        {% endif %}
+
+                        {% if not socialite_providers.isEmpty() %}
+                            <div class="strike">
+                                <span>{{ Lang.get('general.or') }}</span>
+                            </div>
+                            {{ Lang.get('user.login_via', {'provider': ''}) }}
+                            {% for provider, metadata in all_providers %}
+                                {% if socialite_providers.contains('name', provider) %}
+                                    &nbsp;
+                                    <a href="{{ route('user.oauth_redirect', {'provider': provider}) }}" class="social-login round-button" style="background: {{ metadata.colour }};">
+                                        <span class="icon">
+                                            <i class="fa fa-{{ provider }} fa-fw"></i>
+                                        </span>
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+
+
+                    </div>
+
+                    {{ form_close() }}
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if Config.get('settings.language_frontend_toggle') == 1 %}
+            <div class="desk_box">
+                <h2 style="float: left; margin: 0 12px 0 0;">{{ Lang.choice('general.language', 1) }}</h2>
+                <select name="language">
+                    {% for code, language in languages %}
+                        <option value="{{ code }}"
+                                {% if code == App.getLocale() %}selected="selected"{% endif %}
+                                {% if attribute(returnTo, code) is defined %}data-return-to="{{ attribute(returnTo, code) }}"{% endif %}>
+                            {{ language }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+
+    {% endblock %}
+
+    {{ View.fireHook('frontend.sidebar_end') }}
+</div>
+
+<div class="clear"></div>

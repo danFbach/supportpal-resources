@@ -1,0 +1,47 @@
+    <div class="form-row small-selectize">
+        {{ form_label('organisation', Lang.choice('user.organisation', 1)) }}
+        <div class="input-container">
+            {{ form_select('organisation', organisations, userOrganisation|default is not empty ? userOrganisation.id : null) }}
+            {% if record.exists and userOrganisation|default is not empty %}
+                &nbsp;
+                <a class="view-organisation button" href="{{ route('user.operator.organisation.edit', userOrganisation.id) }}" target="_blank">
+                    {{ Lang.get('user.view_organisation') }}
+                </a>
+            {% endif %}
+
+            <input type="hidden" name="organisation_id" {% if userOrganisation|default is not empty %}value="{{ userOrganisation.id }}"{% endif %} />
+        </div>
+    </div>
+    <div class="form-row access-level">
+        {{ form_label('organisation_access_level', Lang.get('user.access_level')) }}
+        <div class="input-container">
+            {{ form_select(
+                'organisation_access_level',
+                {
+                    0: Lang.get('user.manager'),
+                    1: Lang.choice('user.user', 1)
+                },
+                userOrganisation|default is not empty ? record.organisation_access_level : '',
+                userOrganisation|default is not empty and userOrganisation.owner_id == record.id ? { 'disabled': 'disabled' } : {}
+            ) }}<br />
+            <span class="description">
+                {{ Lang.get('user.access_level_desc')|raw }}
+                {% if userOrganisation|default is not empty and userOrganisation.owner_id == record.id %}
+                    <br />{{ Lang.get('user.access_level_not_owner') }}
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    <div class="form-row organisation-notifications {% if userOrganisation|default is empty or record.organisation_access_level == 1 %}hide{% endif %}">
+        {{ form_label('organisation_notifications', Lang.get('user.notifications')) }}
+        <div class="input-container">
+            {{ form_check('organisation_notifications', 1, record.organisation_notifications|default is not empty ?
+                record.organisation_notifications : Config.get('settings.organisation_notifications'),
+                { 'class': 'toggle', 'id': 'toggle_organisation_notifications' }) }}
+            <label for="toggle_organisation_notifications"></label>
+            <br />
+            <span class="description">
+                {{ Lang.get('user.manager_email_notifications_desc') }}
+            </span>
+        </div>
+    </div>

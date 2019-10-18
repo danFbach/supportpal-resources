@@ -1,0 +1,192 @@
+{% extends parent_template %}
+
+{% block title %}
+    {% if title|default is not empty %}
+        {{ title }}
+    {% elseif operator|default is not empty and operator %}
+        {{ Lang.choice("general.operator", 2) }}
+    {% else %}
+        {{ Lang.choice("user.user", 2) }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+    {% if customSearch %}
+        {% include 'operator.' ~ template ~ '.core.search_tabs' %}
+    {% endif %}
+
+	<div class="success box delete hide">
+        {% if operator|default is not empty and operator %}
+            {{ Lang.get('messages.success_deleted', { 'item': mb_strtolower(Lang.choice('general.operator', 1), 'UTF-8') }) }}
+        {% else %}
+            {{ Lang.get('messages.success_deleted', { 'item': mb_strtolower(Lang.choice('user.user', 1), 'UTF-8') }) }}
+        {% endif %}
+    </div>
+    <div class="fail box delete hide">
+        {% if operator|default is not empty and operator %}
+            {{ Lang.get('messages.error_deleted', { 'item': mb_strtolower(Lang.choice('general.operator', 1), 'UTF-8') }) }}
+        {% else %}
+            {{ Lang.get('messages.error_deleted', { 'item': mb_strtolower(Lang.choice('user.user', 1), 'UTF-8') }) }}
+        {% endif %}
+    </div>
+
+    <div class="success box update hide">
+        {% if operator|default is not empty and operator %}
+            {{ Lang.get('messages.success_updated', { 'item': mb_strtolower(Lang.choice('general.operator', 1), 'UTF-8') }) }}
+        {% else %}
+            {{ Lang.get('messages.success_updated', { 'item': mb_strtolower(Lang.choice('user.user', 1), 'UTF-8') }) }}
+        {% endif %}
+    </div>
+    <div class="fail box update hide">
+        {% if operator|default is not empty and operator %}
+            {{ Lang.get('messages.error_updated', { 'item': mb_strtolower(Lang.choice('general.operator', 1), 'UTF-8') }) }}
+        {% else %}
+            {{ Lang.get('messages.error_updated', { 'item': mb_strtolower(Lang.choice('user.user', 1), 'UTF-8') }) }}
+        {% endif %}
+    </div>
+
+	<div class="grid-options options box">
+        {% if operator|default is not empty and operator and auth_user().hasPermission('create.operator') %}
+            <a href="{{ route('user.operator.operator.create') }}">
+                <i class="fa fa-plus"></i>&nbsp;
+                {{ Lang.get('general.add_item', {'item': Lang.choice('general.operator', 1)}) }}
+            </a> &nbsp;&nbsp;&nbsp;
+        {% elseif auth_user().hasPermission('create.user') %}
+            <a href="{{ route('user.operator.user.create') }}" id="createUser">
+                <i class="fa fa-plus"></i>&nbsp;
+                {{ Lang.get('general.add_item', {'item': Lang.choice('user.user', 1)}) }}
+            </a> &nbsp;&nbsp;&nbsp;
+        {% endif %}
+        <a class="toggle-filtering">
+            <i class="fa fa-filter"></i>&nbsp;
+            {{ Lang.get('general.filter_results') }}
+        </a>
+
+        {% include 'operator.' ~ template ~ '.ticket.forms.gridfiltering' %}
+	</div>
+
+	{{ table.render('operator.' ~ template ~ '.datatables')|raw }}
+	{{ table.script()|raw }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/filtering.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/operator/css/filtering.css') }}">
+
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/datatable/selectall.js') }}"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            // Filtering
+            $('.update-filtering').on('click', function() {
+                $('.dataTable').on('preXhr.dt', function ( e, settings, data ) {
+                    // Add conditions to parameters
+                    var conditions = $(".conditiongroup").serializeArray();
+                    $.each(conditions, function(index, value) {
+                        data[value.name] = value.value;
+                    });
+                }).dataTable().api().ajax.reload();
+            });
+
+            // Process delete button
+            $(document).on('click', '.dataTable tfoot .delete-user', function() {
+                deleteUser(getSelectedRows());
+            });
+
+            $(document).on('change', '.dataTable tfoot #btnChangeGroup', function() {
+                // Get the group id
+                var groupId = $(this).val();
+
+                // Get URL depending if its operators or users
+                var url;
+                {% if operator|default is not empty and operator %}
+                    url = laroute.route("user.operator.operatorgroup.members.update", { id: groupId });
+                {% else %}
+                    url = laroute.route("user.operator.usergroup.members.update", { id: groupId });
+                {% endif %}
+
+                // Disable the grid options (buttons)
+                $('.grid-options :input:visible').prop('disabled', true);
+
+                // Update group membership
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: { "user": getSelectedRows() }
+                }).done(function(response) {
+                    if (response.status == 'success') {
+                        $('.update.success').show(500).delay(5000).hide(500);
+                    } else {
+                        $('.update.fail').show(500).delay(5000).hide(500);
+                    }
+                }).fail(function() {
+                    $('.update.fail').show(500).delay(5000).hide(500);
+                }).always(function() {
+                    // Re-enable the grid options (buttons)
+                    $('.grid-options :input:visible').prop('disabled', false);
+                    // Reload table
+                    $('.dataTable').dataTable()._fnAjaxUpdate();
+                });
+
+                // Reset the dropdown to its initial state
+                $('#' + this.id)[0].selectedIndex = 0;
+            });
+        });
+
+        function deleteUser(data) {
+            // Get URL depending if its operators or users
+            var url, section;
+            {% if operator|default is not empty and operator %}
+                url = laroute.route('user.operator.operator.destroymultiple');
+                section = '{{ Lang.choice('general.operator', 2) }}';
+            {% else %}
+                url = laroute.route('user.operator.user.destroymultiple');
+                section = '{{ Lang.choice('user.user', 2) }}';
+            {% endif %}
+
+            // Show the alert
+            swal(deleteAlert.getDefaultOpts(section, '', {{ relations|json_encode|raw }}), function(isConfirm) {
+                if (isConfirm) {
+                    // Disable submit button
+                    deleteAlert.disableButtons();
+                    // Disable the grid options (buttons)
+                    $('.grid-options :input:visible').prop('disabled', true);
+                    // Delete record and reload table if successful
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: { 'user': data },
+                        dataType: 'json'
+                    }).done(function(response) {
+                        if (response.status == 'success') {
+                            $('.delete.success').show(500).delay(5000).hide(500);
+                        } else {
+                            $('.delete.fail').show(500).delay(5000).hide(500);
+                        }
+                    }).fail(function() {
+                        $('.delete.fail').show(500).delay(5000).hide(500);
+                    }).always(function() {
+                        // Close alert
+                        swal.closeModal();
+                        // Re-enable the grid options (buttons)
+                        $('.grid-options :input:visible').prop('disabled', false);
+                        // Reload table
+                        $('.dataTable').dataTable()._fnAjaxUpdate();
+                    });
+                }
+            });
+        }
+    </script>
+
+    {% if not auth_user().hasPermission('update.user|delete.user') %}
+        <style type="text/css">
+            input[name='select-all'] {
+                display: none;
+            }
+        </style>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends parent_template %}
+
+{% block title %}
+    {% if type|default is not empty %}
+        {{ type.name }}
+    {% else %}
+        {{ Lang.choice('selfservice.category', 2) }}
+    {% endif %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {{ Lang.get('selfservice.selfservice') }}
+    &nbsp;&nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i>&nbsp;&nbsp;
+    {% if type|default is not empty %}
+        <a href="{{ route('selfservice.operator.type.index', { 'brand': type.brand_id }) }}">
+            {{ type.brand.name }}
+        </a>
+        &nbsp;&nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i>&nbsp;&nbsp;
+    {% endif %}
+    <strong>{{ Lang.choice('selfservice.category', 2) }}</strong>
+{% endblock %}
+
+{% block content %}
+
+    <div class="grid-options options box">
+        <a href="{{ route('selfservice.operator.category.create', { 'type': type.id }) }}">
+            <i class="fa fa-plus"></i>&nbsp; {{ Lang.get('general.add_item', {'item': Lang.choice('general.category', 1)}) }}
+        </a>
+        &nbsp;&nbsp;
+        <a class="filter-results">
+            <i class="fa fa-filter"></i>&nbsp; {{ Lang.get('general.filter_results') }}
+        </a>
+
+        <div class="filters hide">
+            <div>
+                <label>{{ Lang.get('general.name') }}:</label>
+                <div id="filter_name"></div>
+            </div>
+            <div>
+                <label>{{ Lang.choice('selfservice.type', 1) }}:</label>
+                <div id="filter_type"></div>
+            </div>
+            <div>
+                <label>{{ Lang.choice('core.brand', 1) }}:</label>
+                <div id="filter_brand"></div>
+            </div>
+            <div>
+                <label>{{ Lang.get('general.public') }}:</label>
+                <div id="filter_public"></div>
+            </div>
+        </div>
+    </div>
+
+    {{ table.render()|raw }}
+    {{ table.script()|raw }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <!-- Delete records from the table -->
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+
+    <!-- Filter the table -->
+    <script type="text/javascript">
+        $(document).ready(function(){
+            /**
+             * Initialise the filters
+             */
+            oTable.yadcf([
+                {column_number : 0, column_data_type: "text", html_data_type: "selector", html_data_selector: "a", filter_container_id: "filter_name", filter_type: "text", filter_delay: 500},
+                {column_number : 1, column_data_type: "html", html_data_type: "selector", html_data_selector: "a", filter_container_id: "filter_type"},
+                {column_number : 2, column_data_type: "html", html_data_type: "selector", html_data_selector: "a", filter_container_id: "filter_brand"},
+                {column_number : 3, filter_container_id: "filter_public"}
+            ]);
+        });
+    </script>
+{% endblock %}

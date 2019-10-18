@@ -1,0 +1,27 @@
+{% extends parent_template %}
+
+{% block title %}{{ Lang.get('core.search_results') }}{% endblock %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    {{ Lang.get('core.search_results') }}
+{% endblock %}
+
+{% block content %}
+
+    {{ Lang.get('core.found_results', { 'total': total }) }} '<strong>{{ Input.get('query') }}</strong>'.
+
+    {% for type in types %}
+        {% if type.articles|default is not empty and not type.articles.isEmpty() %}
+            <hr />
+
+            <h3>{{ type.name }}: {{ Lang.choice('selfservice.article', 2) }}</h3>
+
+            {%
+                include 'frontend.' ~ template ~ '.selfservice.article_list'
+                with { 'articles': type.articles, 'type': type, 'noRssFeed': true, 'show_pinned': type.view == 1 }
+            %}
+        {% endif %}
+    {% endfor %}
+
+{% endblock %}

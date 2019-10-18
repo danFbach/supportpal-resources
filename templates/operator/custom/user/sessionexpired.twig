@@ -1,0 +1,27 @@
+{% extends 'operator.' ~ template ~ '.user.login-master' %}
+
+{% block logo %}
+    <img src="{{ get_icon('resources/assets/operator/images/logo_sleep.png') }}"
+         alt="{{ Lang.get('core.product_name') }}" style="max-height: {% if Config.get('settings.operator_icon') is not empty %}80{% else %}98{% endif %}px;" />
+{% endblock %}
+
+{% block content_title %}
+    <h1>{{ Lang.get('user.taking_a_break') }}</h1>
+{% endblock %}
+
+{% block content %}
+
+    <div class="white-box">
+
+        {{ message }}
+
+        <form action="{{ route('operator.login') }}" method="get">
+            {% if Input.has('intended') %}
+                {{ form_hidden('intended', Input.get('intended')) }}
+            {% endif %}
+            <input type="submit" value="{{ Lang.get('user.log_back_in') }}">
+        </form>
+
+    </div>
+
+{% endblock %}

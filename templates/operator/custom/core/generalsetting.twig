@@ -1,0 +1,279 @@
+{% extends parent_template %}
+
+{% block sidebar %}
+    {% include 'operator.' ~ template ~ '.sidebar-settings' %}
+{% endblock %}
+
+{% block title %}
+    {{ Lang.get('general.generalsetting') }}
+{% endblock %}
+
+{% block description %}
+    {{ Lang.get('core.generalsetting_desc') }}
+{% endblock %}
+
+{% block content %}
+
+{{ form_model(fields, { 'method': 'PUT', 'route': [ 'core.operator.generalsetting.update' ] }) }}
+
+	<ul class="tabs">
+        <li id="System" class="active">{{ Lang.get('general.system') }}</li>
+        <li id="Email">{{ Lang.get('general.email') }}</li>
+        <li id="Locale">{{ Lang.get('core.locale') }}</li>
+        <li id="SimpleAuth">{{ Lang.get('core.simpleauth') }}</li>
+        <li id="Captcha">{{ Lang.get('core.captcha') }}</li>
+        <li id="Debug">{{ Lang.get('core.debug') }}</li>
+	</ul>
+
+    <div id="tabSystem" class="tabContent">
+
+        {% if brand_count() > 1 %}
+            <div class="form-row">
+                {{ form_label('default_brand', Lang.get('core.default_brand')) }}
+                <div class="input-container">
+                    {{ form_select('default_brand', enabledBrands.pluck('name', 'id')) }}<br />
+                    <span class="description">{{ Lang.get('core.default_brand_desc') }}</span>
+                </div>
+            </div>
+        {% else %}
+            {{ form_hidden('default_brand', brand_config(null)|first.id) }}
+        {% endif %}
+
+        <div class="form-row">
+            {{ form_label('admin_folder', Lang.get('core.admin_folder')) }}
+            <div class="input-container">
+                {{ form_text('admin_folder') }}<br />
+                <span class="description">{{ Lang.get('core.admin_folder_desc') }}</span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            {{ form_label('enable_ssl', Lang.get('core.enable_ssl')) }}
+            <div class="input-container">
+                {{ form_check('enable_ssl', 1, null, { 'class': 'toggle', 'id': 'toggle_enable_ssl' }) }}
+                <label for="toggle_enable_ssl"></label><br />
+                <span class="description">{{ Lang.get('core.enable_ssl_desc') }}</span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            {{ form_label('pretty_urls', Lang.get('core.pretty_urls')) }}
+            <div class="input-container">
+                {{ form_check('pretty_urls', 1, null, { 'class': 'toggle', 'id': 'toggle_pretty_urls' }) }}
+                <label for="toggle_pretty_urls"></label><br />
+                <span class="description">{{ Lang.get('core.pretty_urls_desc') }}</span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            {{ form_label('maintenance_mode', Lang.get('core.maintenance_mode')) }}
+            <div class="input-container">
+                {{ form_check('maintenance_mode', 1, null, { 'class': 'toggle', 'id': 'toggle_maintenance_mode' }) }}
+                <label for="toggle_maintenance_mode"></label><br />
+                <span class="description">{{ Lang.get('core.maintenance_mode_desc') }}</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="tabEmail" class="tabContent hide">
+
+        <div class="form-row">
+            {{ form_label('attachment_size', Lang.get('core.attachment_size')) }}
+            <div class="input-container">
+                {{ form_text('attachment_size') }}<br />
+                <span class="description">{{ Lang.get('core.attachment_size_desc') }}</span>
+            </div>
+        </div>
+
+        {% if isModuleEnabled('Ticket') %}
+            <div class="form-row">
+                {{ form_label('include_operator_name', Lang.get('core.include_operator_name')) }}
+                <div class="input-container">
+                    {{ form_check('include_operator_name', 1, null, { 'class': 'toggle', 'id': 'toggle_include_operator_name' }) }}
+                    <label for="toggle_include_operator_name"></label><br />
+                    <span class="description">{{ Lang.get('core.include_operator_name_desc') }}</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                {{ form_label('include_department_name', Lang.get('core.include_dept_name')) }}
+                <div class="input-container">
+                    {{ form_check('include_department_name', 1, null, { 'class': 'toggle', 'id': 'toggle_include_department_name' }) }}
+                    <label for="toggle_include_department_name"></label><br />
+                    <span class="description">{{ Lang.get('core.include_dept_name_desc') }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="form-row">
+            {{ form_label('email_method', Lang.get('core.email_method')) }}
+            <div class="input-container input-group">
+                <label>{{ form_radio('email_method', 'mail', true, {
+                        'onclick': "document.getElementById('smtp').style.display = 'none';"
+                    })
+                }} {{ Lang.get('core.php_mail_function') }}</label> &nbsp;
+                <label>{{ form_radio('email_method', 'smtp', null, {
+                        'onclick': "document.getElementById('smtp').style.display = 'block';"
+                    })
+                }} {{ Lang.get('core.smtp') }}</label>
+            </div>
+        </div>
+
+        {% include 'operator.' ~ template ~ '.core.forms.smtp_tab' with {'record': fields, 'email_method': record.email_method} %}
+
+    </div>
+
+    <div id="tabLocale" class="tabContent hide">
+
+        {% include 'operator.' ~ template ~ '.core.forms.locale_tab' %}
+
+        <div class="form-row">
+            {{ form_label('default_language', Lang.get('general.default_language')) }}
+            <div class="input-container input-group">
+                <label>
+                    <strong>{{ Lang.get('general.frontend') }}</strong> &nbsp;&nbsp;
+                    {{ form_select('default_frontend_language', languages) }}
+                </label><br />
+                <label>
+                    <strong>{{ Lang.choice('general.operator', 1) }}</strong> &nbsp;&nbsp;
+                    {{ form_select('default_operator_language', languages) }}
+                </label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            {{ form_label('language_toggle', Lang.get('general.language_toggle')) }}
+            <div class="input-container input-group">
+                <strong>{{ Lang.get('general.frontend') }}</strong> &nbsp;&nbsp;
+                <label>{{ form_radio('language_frontend_toggle', 1) }} {{ Lang.get('general.show') }}</label> &nbsp;
+                <label>{{ form_radio('language_frontend_toggle', 0) }} {{ Lang.get('general.hide') }}</label><br />
+                <strong>{{ Lang.choice('general.operator', 1) }}</strong> &nbsp;&nbsp;
+                <label>{{ form_radio('language_operator_toggle', 1) }} {{ Lang.get('general.show') }}</label> &nbsp;
+                <label>{{ form_radio('language_operator_toggle', 0) }} {{ Lang.get('general.hide') }}</label>
+            </div>
+        </div>
+
+        {# Enabled languages #}
+        {% if languages|length == 1 %}
+            <div class="form-row">
+                {{ form_label('include_locale_in_uri', Lang.get('core.locale_in_uri')) }}
+                <div class="input-container">
+                    {% set checked = fields.include_locale_in_uri|default is empty ? 1 : fields.include_locale_in_uri %}
+                    {{ form_check('include_locale_in_uri', 1, checked, { 'class': 'toggle', 'id': 'toggle_include_locale_in_uri' }) }}
+                    <label for="toggle_include_locale_in_uri"></label><br />
+                    <span class="description">{{ Lang.get('core.locale_in_uri_desc') }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+    </div>
+
+    <div id="tabSimpleAuth" class="tabContent hide">
+
+        <div class="form-row">
+            {{ form_label('simpleauth_key', Lang.get('core.simpleauth_key')) }}
+            <div class="input-container">
+                {{ form_text('simpleauth_key', null, { 'size': 40 }) }}<br />
+                <span class="description">{{ Lang.get('core.simpleauth_key_desc') }}</span>
+            </div>
+        </div>
+
+        <div class="form-row">
+            {{ form_label('simpleauth_operators', Lang.get('core.simpleauth_operators')) }}
+            <div class="input-container">
+                {{ form_check('simpleauth_operators', 1, null, { 'class': 'toggle', 'id': 'toggle_simpleauth_operators' }) }}
+                <label for="toggle_simpleauth_operators"></label><br />
+                <span class="description">{{ Lang.get('core.simpleauth_operators_desc') }}</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="tabCaptcha" class="tabContent hide">
+
+        <div class="form-row">
+            {{ form_label('captcha_type', Lang.get('core.captcha_type')) }}
+            <div class="input-container input-group">
+                <label>
+                    {{ form_radio('captcha_type', 0, null,
+                        { 'onclick': "document.querySelector('.recaptcha').style.display = 'none';" })
+                    }}
+                    {{ Lang.get('general.disabled') }}
+                </label><br />
+                <label>
+                    {{ form_radio('captcha_type', 1, null,
+                        { 'onclick': "document.querySelector('.recaptcha').style.display = 'none';" })
+                    }}
+                    {{ Lang.get('core.default_captcha') }}
+                </label><br />
+                <label>
+                    {{ form_radio('captcha_type', 2, null,
+                        { 'onclick': "document.querySelector('.recaptcha').style.display = 'block';" })
+                    }}
+                    Google reCAPTCHA v2 (No CAPTCHA)
+                </label><br />
+                <label>
+                    {{ form_radio('captcha_type', 3, null,
+                        { 'onclick': "document.querySelector('.recaptcha').style.display = 'block';" })
+                    }}
+                    Google Invisible reCAPTCHA
+                </label><br />
+                <span class="description">{{ Lang.get('core.captcha_type_desc') }}</span>
+            </div>
+        </div>
+
+        <div class="recaptcha {% if fields.captcha_type != 2 and fields.captcha_type != 3 %}hide{% endif %}">
+            <div class="form-row">
+                {{ form_label('recaptcha_site_key', Lang.get('core.recaptcha_site_key')) }}
+                <div class="input-container input-group">
+                    {{ form_text('recaptcha_site_key', null, { 'size': 45 }) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                {{ form_label('recaptcha_secret_key', Lang.get('core.recaptcha_secret_key')) }}
+                <div class="input-container input-group">
+                    {{ form_text('recaptcha_secret_key', null, { 'size': 45 }) }}<br />
+                    <span class="description">{{ Lang.get('core.recaptcha_desc')|raw }}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="tabDebug" class="tabContent hide">
+
+        <div class="form-row">
+            {{ form_label('debug_mode', Lang.get('core.debug_mode')) }}
+            <div class="input-container">
+                {{ form_check('debug_mode', 1, null, { 'class': 'toggle', 'id': 'toggle_debug_mode' }) }}
+                <label for="toggle_debug_mode"></label><br />
+                <span class="description">{{ Lang.get('core.debug_mode_desc') }}</span>
+            </div>
+        </div>
+
+    </div>
+
+    <hr />
+
+    <div class="form-button">
+        {{ form_submit(Lang.get('general.save'), { 'id': 'saveGeneralSettings' }) }}
+    </div>
+
+{{ form_close() }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/settings.js') }}"></script>
+    <script type="text/javascript">
+        var sslWarning = new SslWarning({
+            route: "{{ mail_route('core.frontend.home') }}"
+        });
+        
+        $(function () {
+            sslWarning.init(); 
+        });
+    </script>
+{% endblock %}

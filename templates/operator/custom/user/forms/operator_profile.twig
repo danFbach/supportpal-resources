@@ -1,0 +1,10 @@
+{% include 'operator.' ~ template ~ '.user.forms.profile' with profileParameters %}
+
+<div class="form-row">
+    {{ form_label('opsettings[template]', Lang.get('user.operator_template')) }}
+    <div class="input-container">
+        {{ form_select('opsettings[template]', {0: '-- ' ~ Lang.get('general.system_default') ~ ' --'} + templates,
+            record.opsettings.template|default is not empty ? record.opsettings.template : 0
+        ) }}
+    </div>
+</div>

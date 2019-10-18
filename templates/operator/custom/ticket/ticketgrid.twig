@@ -1,0 +1,828 @@
+{% extends parent_template %}
+
+{% block sidebar %}
+    {% if not customSearch and record is not defined %}
+        {% include 'operator.' ~ template ~ '.ticket.sidebar-grid' %}
+    {% endif %}
+{% endblock %}
+
+{% block title %}
+    {% if title|default is not empty %}
+        {{ title }}
+    {% else %}
+        {{ Lang.choice('ticket.ticket', 2) }}
+    {% endif %}
+{% endblock %}
+
+{% block description %}
+    {% if description|default is not empty %}
+        {{ description }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+    {% if record|default is not empty %}
+        {% if record.name is not empty %}
+            {% include 'operator.' ~ template ~ '.user.forms.organisation_tabs' %}
+        {% elseif record.formatted_name is defined %}
+            {% include 'operator.' ~ template ~ '.user.forms.user_tabs' %}
+        {% endif %}
+    {% elseif customSearch %}
+        {% include 'operator.' ~ template ~ '.core.search_tabs' %}
+    {% endif %}
+
+    <div class="success box tickets-update hide">
+        {{ Lang.get('messages.success_updated', { 'item': mb_strtolower(Lang.get('ticket.tickets'), 'UTF-8') }) }}
+    </div>
+    <div class="fail box tickets-update hide">
+        {{ Lang.get('messages.error_updated', { 'item': mb_strtolower(Lang.get('ticket.tickets'), 'UTF-8') }) }}
+    </div>
+    <div class="success box tickets-trash hide">
+        {{ Lang.get('messages.success_trashed', { 'item': mb_strtolower(Lang.get('ticket.tickets'), 'UTF-8') }) }}
+    </div>
+    <div class="fail box tickets-trash hide">
+        {{ Lang.get('messages.error_trashed', { 'item': mb_strtolower(Lang.get('ticket.tickets'), 'UTF-8') }) }}
+    </div>
+    <div class="success box tickets-delete hide">
+        {{ Lang.get('messages.success_deleted', { 'item': mb_strtolower(Lang.get('ticket.tickets'), 'UTF-8') }) }}
+    </div>
+    <div class="fail box tickets-delete hide">
+        {{ Lang.get('messages.error_deleted', { 'item': mb_strtolower(Lang.get('ticket.tickets'), 'UTF-8') }) }}
+    </div>
+    <div class="fail box ticket-assign hide">
+    </div>
+    <div class="fail box ticket-department hide">
+    </div>
+
+	<div class="grid-options options box">
+        {% if (auth_user().hasPermission('create.ticket')) %}
+            {% if record|default is not empty %}
+                {% if record.formatted_name is not empty %}
+                    <a href="{{ route('ticket.operator.ticket.createStep1', {'user': record.id}) }}">
+                        <i class="fa fa-plus"></i>&nbsp;
+                        {{ Lang.get("ticket.open_new_for_user") }}
+                    </a>&nbsp;&nbsp;&nbsp;
+                {% endif %}
+            {% else %}
+                <a id="openNewTicket" href="{{ route('ticket.operator.ticket.createStep1') }}">
+                    <i class="fa fa-plus"></i>&nbsp;
+                    {{ Lang.get("ticket.open_new") }}
+                </a>&nbsp;&nbsp;&nbsp;
+            {% endif %}
+        {% endif %}
+        {% if not Input.get('filter') %}
+        <a class="toggle-filtering" id="filter-columns">
+            <i class="fa fa-filter"></i>&nbsp;
+            {{ Lang.get('general.filter_results') }}
+        </a> &nbsp;&nbsp;&nbsp;
+        {% endif %}
+        <a class="adjust-columns" id="adjust-columns">
+            <i class="fa fa-columns"></i>&nbsp;
+            {{ Lang.get('ticket.adjust_columns') }}
+        </a> &nbsp;&nbsp;&nbsp;
+        <span class="right" style="margin-top: -3px;" id="order-columns">
+            <i class="fa fa-sort"></i>&nbsp;
+            {{ Lang.get('general.default') }} {{ Lang.get('general.order_by') }} &nbsp;
+            {{ form_select('grid_ordering', {
+                    0: Lang.get('ticket.opened_at'),
+                    1: Lang.get('ticket.last_reply'),
+                    2: Lang.get('ticket.due_time')
+                }, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_ordering')
+                ) }} &nbsp;
+            {{ form_select('grid_ordering_direction', {
+                    0: Lang.get('general.ascending'),
+                    1: Lang.get('general.descending')
+                }, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_ordering_direction'))
+            }}
+        </span>
+
+        <form class="conditiongroup hide"></form>
+	</div>
+
+    <div class="column-options options box hide">
+        {{ form_open({ 'route': 'ticket.operator.ticket.saveColumns' }) }}
+            <strong>{{ Lang.choice('general.column', 2) }}</strong>: &nbsp;
+            <label>
+                {{ form_check('column_priority', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['priority']) }}
+                {{ Lang.choice('ticket.priority', 1) }}
+            </label> &nbsp;
+            <label>
+                {{ form_check('column_status', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['status']) }}
+                {{ Lang.choice('general.status', 1) }}
+            </label> &nbsp;
+            <label>
+                {{ form_check('column_attachments', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['attachments']) }}
+                {{ Lang.choice('general.attachment', 2) }}
+            </label> &nbsp;
+            <label>
+                {{ form_check('column_subject', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['subject']) }}
+                {{ Lang.get('ticket.subject') }}
+            </label> &nbsp;
+            <label>
+                {{ form_check('column_user', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['user']) }}
+                {{ Lang.choice('user.user', 1) }}
+            </label> &nbsp;
+            {% if Config.get('settings.organisations_enabled') %}
+                <label>
+                    {{ form_check('column_organisation', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['organisation']) }}
+                    {{ Lang.choice('user.organisation', 1) }}
+                </label> &nbsp;
+            {% endif %}
+            <label>
+                {{ form_check('column_department', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['department']) }}
+                {{ Lang.choice('ticket.department', 1) }}
+            </label> &nbsp;
+            {% if brand_count() > 1 %}
+                <label>
+                    {{ form_check('column_brand', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['brand']) }}
+                    {{ Lang.choice('core.brand', 1) }}
+                </label> &nbsp;
+            {% endif %}
+            <label>
+                {{ form_check('column_submitted', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['submitted']) }}
+                {{ Lang.get('ticket.submitted') }}
+            </label> &nbsp;
+            <label>
+                {{ form_check('column_lastreply', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['lastreply']) }}
+                {{ Lang.get('ticket.last_reply') }}
+            </label> &nbsp;
+            <label>
+                {{ form_check('column_duetime', 1, Config.get('settings.operator' ~ auth_user().id ~ '.ticket_grid_columns')['duetime']) }}
+                {{ Lang.get('ticket.due_time') }}
+            </label>
+            {{ form_submit(Lang.get('general.save'), { 'class': 'right', 'style': 'margin: -4px;' }) }}
+        {{ form_close() }}
+    </div>
+
+	{{ table.render('operator.' ~ template ~ '.datatables')|raw }}
+	{{ table.script()|raw }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <!-- Redactor -->
+    <script src="{{ asset_rev('resources/assets/libs/editor.min.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/general/js/redactor_config.js') }}"></script>
+
+    <!-- Code Editor -->
+    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/operator/css/codeeditor.css') }}" />
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/redactor/codeeditor.js') }}"></script>
+
+    <!-- File upload -->
+    <script src="{{ asset_rev('resources/assets/general/js/fileupload.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/redactor/replyoptions.js') }}"></script>
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/filtering.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/general/js/done_typing.js') }}"></script>
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/general/js/sanitize.js') }}"></script>
+
+    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/operator/css/ticket.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/operator/css/filtering.css') }}">
+
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/datatable/selectall.js') }}"></script>
+
+    {# Only load the sidebar on the main ticket grid. #}
+    {% if not customSearch and record is not defined %}
+        <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/sidebar.js') }}"></script>
+    {% endif %}
+
+    <script type="text/javascript">
+        // Schedule first grid refresh in 60 seconds.
+        var gridTimeout = setTimeout(function() {
+            refreshGrid();
+        }, 60000);
+
+        $(document).ready(function() {
+            // Reference to fileupload.js instance, from mass reply box.
+            var fileUpload;
+
+            /**
+             * Mass Reply file uploads.
+             */
+            $(document)
+                .on('click', '.reply-ticket', function () {
+                    fileUpload = new FileUpload({
+                        registerEvents: false
+                    });
+                })
+                .on('click', '.attached-files .deleteAttachment', function(e) {
+                    var url = $(this).data('url');
+                    var hash = $(this).data('hash');
+                    var $listItem = $(this).parents('li');
+
+                    // Hide cross
+                    $(this).hide();
+
+                    // DELETE the file!
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: { 'hash': hash },
+                        success: function(result) {
+                            if (result.success == true
+                                && (typeof $listItem !== 'undefined' && $listItem instanceof jQuery)
+                            ) {
+                                $('div.attachment-details').find('input[name="attachment['+ hash +']"]').remove();
+                                $listItem.remove();
+                            }
+                        },
+                        error: function(result) {
+                            // Show cross again
+                            $(this).show();
+                        }
+                    });
+                });
+
+            var $datatable = $('.dataTable'),
+                $tfoot = $datatable.find('tfoot');
+
+            // Changing order of grid (delay next refresh of grid by 60 seconds)
+            $datatable.on('order.dt', function () {
+                clearTimeout(gridTimeout);
+                gridTimeout = setTimeout(function() {
+                    refreshGrid();
+                }, 60000);
+            });
+
+            // Load grid filtering for the first time.
+            $('.toggle-filtering').on('click', function () {
+                // The #FollowUp node will be empty if we haven't loaded it before.
+                if ($('form.conditiongroup').is(':empty')) {
+                    // Show loading icon
+                    $('form.conditiongroup').html('<div style="padding: 10px;"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>');
+
+                    // Fetch view
+                    $.get(
+                        '{{ route("ticket.operator.ticket.filtering") }}', getUrlVars(),
+                        function(response) {
+                            if (response.status == 'success') {
+                                // Update form
+                                $('form.conditiongroup').html(response.data);
+
+                                // Initialise date picker.
+                                callPikaday();
+
+                                // If we have default conditions
+                                Filtering.initialise();
+                            } else {
+                                // Show message to refresh
+                                $('form.conditiongroup').html('<div style="padding: 10px;">' + Lang.get('messages.please_refresh') + '</div>');
+                            }
+                        }, "json").fail(function() {
+                        // Show message to refresh
+                        $('form.conditiongroup').html('<div style="padding: 10px;">' + Lang.get('messages.please_refresh') + '</div>');
+                    });
+                }
+            });
+
+            // Filtering
+            $('.conditiongroup').on('click', '.update-filtering', function() {
+                clearTimeout(gridTimeout);
+
+                $datatable.on('preXhr.dt', function ( e, settings, data ) {
+                    // DEV-829, remove hardcoded route conditions (?conditions=...)
+                    settings.sAjaxSource = '{{ sAjaxSource }}';
+
+                    // Add conditions to parameters
+                    var conditions = $(".conditiongroup").serializeArray();
+                    $.each(conditions, function(index, value) {
+                        data[value.name] = value.value;
+                    });
+                }).dataTable().api().ajax.reload();
+
+                // Delay next refresh of grid by 60 seconds.
+                gridTimeout = setTimeout(function() {
+                    refreshGrid();
+                }, 60000);
+            });
+
+            // Process reply button
+            $tfoot.on('click', '.reply-ticket', function() {
+                swal({
+                    title: Lang.get("ticket.mass_reply"),
+                    html: '<form class="mass-reply">'
+                        + '<div class="fail box attachment hide"></div>'
+                        + '{{ form_redactor("text") }}'
+                        + '<div class="attachment-details">'
+                        + '    <input type="hidden" name="attachment[]" disabled="disabled" />'
+                        + '</div>'
+                        + '<ul class="attached-files">'
+                        + '    <li class="hide">'
+                        + '        <i class="fa fa-file"></i>'
+                        + '        &nbsp;'
+                        + '        <span class="information">'
+                        + '            <span class="filename ellipsis"></span>'
+                        + '            &nbsp;'
+                        + '            <span class="filesize"></span>'
+                        + '            <i class="fa fa-times deleteAttachment right hide"></i>'
+                        + '        </span>'
+                        + '        <div class="progress">'
+                        + '            <div class="bar"></div>'
+                        + '        </div>'
+                        + '    </li>'
+                        + '</ul>'
+                        + '<label class="file-input button" style="margin-top: 15px;">'
+                        + '    <i class="fa fa-paperclip"></i>&nbsp; ' + Lang.get("general.add_attachment")
+                        + '    <input class="fileupload" type="file" name="files[]" data-url="' + laroute.route("ticket.operator.attachment.upload") + '" multiple="multiple">'
+                        + '</label>'
+                        + '<br /><br />'
+                        + '<strong>' + Lang.get("ticket.reply_options") + '</strong>:<br />'
+                        + '<label>'
+                        + '    {{ form_check("send_email_to_users", 1, true) }}'
+                        + '    ' + Lang.get("ticket.send_email_to_users")
+                        + '</label> &nbsp;&nbsp;&nbsp; <label>'
+                        + '    {{ form_check("send_email_to_operators", 1) }}'
+                        + '    ' + Lang.get("ticket.send_email_to_operators")
+                        + '</label><br /><label>'
+                        + '    {{ form_check("take_ownership", 1) }}'
+                        + '    ' + Lang.get("ticket.take_ownership")
+                        + '</label> &nbsp;&nbsp;&nbsp;'
+                        + '{{ form_label("to_status", Lang.get("ticket.set_status")) }} '
+                        + '{{ form_select("to_status", obj_statuses.pluck("name", "id")) }}'
+                        + '</form>',
+                    width: '800',
+                    showCancelButton: true,
+                    closeOnConfirm: false,
+                    allowOutsideClick: false
+                }, function(isConfirm) {
+                    if (isConfirm) {
+                        swal.disableButtons();
+                        saveMessage($('form.mass-reply'));
+                    } else {
+                        // Cancel button was pressed. Clear any uploaded attachments
+                        $('input[name="attachment[]"]:not(:first)').remove();
+                        // Remove the uploads from the file system and the database
+                        $('.attached-files li:not(.hide) .deleteAttachment').trigger('click');
+                    }
+                });
+                $('textarea').redactor($.extend($.Redactor.default_opts, {
+                    focus: true,
+                    plugins: ['syntax', 'imagemanager', 'table', 'video', 'fontcolor', 'fontfamily', 'fontsize'],
+                    // Key down event causes mass reply modal to hide
+                    keydownCallback: function(e) { e.stopPropagation(); }
+                }));
+            });
+
+            function saveMessage(form) {
+                var data = form.serializeArray();
+                // Add other data
+                data.push({ name: 'reply_type', value: 0 });
+
+                // Add ticket IDs.
+                var ids = getSelectedRows().split(',');
+                for(var i = 0; i < ids.length; i++) {
+                    data.push({ name: 'ticket['+i+']', value: ids[i] });
+                }
+
+                // Post updated data
+                $.ajax({
+                    url: laroute.route('ticket.operator.message.store'),
+                    type: 'POST',
+                    data: data,
+                    dataType: 'json'
+                }).done(function(response) {
+                    if (response.status == 'success') {
+                        // Show success message
+                        swal(Lang.get('messages.success_created', { 'item': Lang.choice('general.message', 1) }));
+                    } else {
+                        // Show error message
+                        swal(Lang.get('messages.error_created', { 'item': Lang.choice('general.message', 1) }));
+                    }
+                }).fail(function() {
+                    // Show error message
+                    swal(Lang.get('messages.error_created', { 'item': Lang.choice('general.message', 1) }));
+                }).always(function() {
+                    // Reload table
+                    refreshGrid();
+                });
+            }
+
+            // Process take button
+            $tfoot.on('click', '.take-ticket', function() {
+                ticketAction({ ticket: getSelectedRows() }, laroute.route('ticket.operator.action.take'));
+            });
+            // Process close button
+            $tfoot.on('click', '.close-ticket', function() {
+                ticketAction({ ticket: getSelectedRows() }, laroute.route('ticket.operator.action.close'));
+            });
+            // Process lock button
+            $tfoot.on('click', '.lock-ticket', function() {
+                ticketAction({ ticket: getSelectedRows() }, laroute.route('ticket.operator.action.lock'));
+            });
+            // Process unlock button
+            $tfoot.on('click', '.unlock-ticket', function() {
+                ticketAction({ ticket: getSelectedRows() }, laroute.route('ticket.operator.action.unlock'));
+            });
+            // Process watch button
+            $tfoot.on('click', '.watch-ticket', function() {
+                ticketAction({ ticket: getSelectedRows() }, laroute.route('ticket.operator.action.watch'));
+            });
+            // Process unwatch button
+            $tfoot.on('click', '.unwatch-ticket', function() {
+                ticketAction({ ticket: getSelectedRows() }, laroute.route('ticket.operator.action.unwatch'));
+            });
+            // Process link button
+            $tfoot.on('click', '.link-ticket', function() {
+                ticketAction({ ticket: getSelectedRows() }, laroute.route('ticket.operator.linked.link'));
+            });
+            // Process merge button
+            $tfoot.on('click', '.merge-ticket', function() {
+                mergeTickets({ ticket: getSelectedRows() });
+            });
+            // Process unmerge button
+            $tfoot.on('click', '.unmerge-ticket', function() {
+                ticketAction({ ticket: getSelectedRows() }, laroute.route('ticket.operator.action.unmerge'));
+            });
+            $tfoot.on('click', '.restore-ticket', function() {
+                restoreTicket(getSelectedRows());
+            });
+            // Process delete button
+            $tfoot.on('click', '.delete-ticket', function() {
+                deleteTicket(getSelectedRows(), false);
+            });
+            $tfoot.on('click', '.delete-forever-ticket', function() {
+                deleteTicket(getSelectedRows(), false, true);
+            });
+            // Process block button
+            $tfoot.on('click', '.block-ticket', function() {
+                deleteTicket(getSelectedRows(), true, false);
+            });
+
+            // Process department change
+            $tfoot.on('change', '.ticket-options select[name=department]', function(event) {
+                if ($(this).val() != '') {
+                    ticketAction({ ticket: getSelectedRows(), department_id: $(this).val() }, laroute.route('ticket.operator.action.department'));
+                    // Reset dropdown
+                    $(this).val('');
+                    event.stopPropagation();
+                }
+            });
+
+            // Process assign/unassign operator
+            $tfoot.on('change', '.ticket-options select[name=assign], .ticket-options select[name=unassign]', function(event) {
+                if ($(this).val() != '') {
+                    var unassign = false;
+                    if ($(this).attr('name') == 'unassign') {
+                        unassign = true;
+                    }
+                    assignOperator(getSelectedRows(), $(this).val(), unassign);
+                    // Reset dropdown
+                    $(this).val('');
+                    event.stopPropagation();
+                }
+            });
+
+            // Process macros.
+            $tfoot.on('change', '.ticket-options select[name=macro]', function (event) {
+                if ($(this).val() !== '') {
+                    ticketAction({ ticket: getSelectedRows(), macro_id: $(this).val() }, laroute.route('ticket.operator.action.macro'));
+
+                    // Reset dropdown
+                    $(this).val('');
+                    event.stopPropagation();
+                }
+            });
+
+            // Update ticket details
+            $tfoot.on('change', '.ticket-options select', function (event) {
+                // Only run if value is not empty
+                if ($(this).val() != '') {
+                    var data = $(this).serializeArray();
+                    data.push({ name: 'ticket', value: getSelectedRows() });
+                    updateTicket(data);
+                    // Reset dropdown
+                    $(this).val('');
+                    event.stopPropagation();
+                }
+            });
+
+            $('.adjust-columns').on('click', function() {
+                $('.column-options').toggle();
+            });
+
+            $('select[name="grid_ordering"],select[name="grid_ordering_direction"]').on('change', function() {
+                // Post updated data
+                $.post(
+                    laroute.route('ticket.operator.ticket.saveOrdering'),
+                    {
+                        ordering: $('select[name="grid_ordering"]').val(),
+                        direction: $('select[name="grid_ordering_direction"]').val()
+                    }
+                ).always(function() {
+                    // Reload table
+                    refreshGrid();
+                });
+            });
+        });
+
+        function updateTicket(data) {
+            // Show processing
+            $('.ticket-options .processing').show();
+
+            // Post updated data
+            $.post(
+                laroute.route('ticket.operator.action.update'),
+                data,
+            function(response) {
+                if (response.status == 'success') {
+                    $('.tickets-update.success').show(500).delay(5000).hide(500);
+                } else {
+                    $('.tickets-update.fail').show(500).delay(5000).hide(500);
+                }
+            }, "json").fail(function() {
+                $('.tickets-update.fail').show(500).delay(5000).hide(500);
+            }).always(function() {
+                // Reload table
+                refreshGrid();
+                // Hide processing
+                $('.ticket-options .processing').hide();
+            });
+        }
+
+        function ticketAction(data, route) {
+            // Show processing
+            $('.ticket-options .processing').show();
+
+            // Post updated data
+            $.post(
+                route,
+                data,
+            function(response) {
+                if (response.status == 'success') {
+                    $('.tickets-update.success').show(500).delay(5000).hide(500);
+                } else {
+                    // Only show specific error for update department
+                    if (typeof response.message != 'undefined' && route == laroute.route('ticket.operator.action.department')) {
+                        $('.ticket-department.fail').text(response.message).show(500).delay(5000).hide(500).text();
+                    } else {
+                        $('.tickets-update.fail').show(500).delay(5000).hide(500);
+                    }
+                }
+            }, "json").fail(function() {
+                $('.tickets-update.fail').show(500).delay(5000).hide(500);
+            }).always(function() {
+                // Reload table
+                refreshGrid();
+                // Hide processing
+                $('.ticket-options .processing').hide();
+            });
+        }
+
+        function mergeTickets(data) {
+            // Need at least two tickets.
+            if (data.ticket.split(',').length < 2) {
+                $('.tickets-update.fail').show(500).delay(5000).hide(500);
+                return;
+            }
+
+            swal({
+                title: "{{ Lang.get('ticket.merge_tickets') }}",
+                html: "{{ Lang.get('ticket.merge_tickets_confirm') }}<br /><br />" + ticketList(data.ticket)[0].outerHTML,
+                confirmButtonText: '{{ Lang.get('ticket.merge') }}',
+                showCancelButton: true,
+                closeOnConfirm: false
+            }, function (isConfirm) {
+                if (isConfirm) {
+                    swal.disableButtons();
+
+                    // Delete record and reload table if successful
+                    $.ajax({
+                        url: laroute.route('ticket.operator.action.merge'),
+                        type: 'POST',
+                        data: data,
+                        dataType: 'json'
+                    }).done(function(response) {
+                        if (response.status == 'success') {
+                            $('.tickets-update.success').show(500).delay(5000).hide(500);
+                        } else {
+                            $('.tickets-update.fail').show(500).delay(5000).hide(500);
+                        }
+                    }).fail(function() {
+                        $('.tickets-update.fail').show(500).delay(5000).hide(500);
+                    }).always(function() {
+                        // Close modal
+                        swal.closeModal();
+
+                        // Reload table
+                        refreshGrid();
+                    });
+                }
+            });
+        }
+
+        function assignOperator(data, operator, unassign) {
+            // Get route depending if assigning or unassigning operator
+            var route;
+            if (unassign) {
+                route = laroute.route('ticket.operator.action.unassign');
+            } else {
+                route = laroute.route('ticket.operator.action.assign');
+            }
+
+            // Show processing
+            $('.ticket-options .processing').show();
+
+            // Post updated data
+            $.post(
+                route,
+                {
+                    'ticket': data,
+                    'operator': [ operator ]
+                },
+            function(response) {
+                if (response.status == 'success') {
+                    $('.tickets-update.success').show(500).delay(5000).hide(500);
+                } else {
+                    if (typeof response.message != 'undefined') {
+                        $('.ticket-assign.fail').text(response.message).show(500).delay(5000).hide(500).text();
+                    } else {
+                        $('.tickets-update.fail').show(500).delay(5000).hide(500);
+                    }
+                }
+            }, "json").fail(function() {
+                $('.tickets-update.fail').show(500).delay(5000).hide(500);
+            }).always(function() {
+                // Reload table
+                refreshGrid();
+                // Hide processing
+                $('.ticket-options .processing').hide();
+            });
+        }
+
+        function restoreTicket(data) {
+            $.ajax({
+                url: laroute.route('ticket.operator.action.restore'),
+                type: 'POST',
+                data: { 'ticket': data },
+                dataType: 'json'
+            }).done(function(response) {
+                if (response.status == 'success') {
+                    $('.tickets-update.success').show(500).delay(5000).hide(500);
+                    refreshGrid();
+                } else {
+                    $('.tickets-update.fail').show(500).delay(5000).hide(500);
+                }
+            }).fail(function() {
+                $('.tickets-update.fail').show(500).delay(5000).hide(500);
+            });
+        }
+
+        function deleteTicket(data, block, force) {
+            // Are we also blocking?
+            block = typeof block !== 'undefined' ? block : false;
+
+            var type = block ? 'POST' : 'DELETE',
+                route = block ? laroute.route('ticket.operator.action.block') :
+                    (force ? laroute.route('ticket.operator.action.destroy') : laroute.route('ticket.operator.action.trash')),
+                messageDiv = force ? '.tickets-delete' : '.tickets-trash';
+
+            var ajax = function () {
+                return $.ajax({
+                    url: route,
+                    type: type,
+                    data: { 'ticket': data },
+                    dataType: 'json'
+                }).done(function(response) {
+                    if (response.status == 'success') {
+                        $(messageDiv + '.success').show(500).delay(5000).hide(500);
+                    } else {
+                        $(messageDiv + '.fail').show(500).delay(5000).hide(500);
+                    }
+                }).fail(function() {
+                    $(messageDiv + '.fail').show(500).delay(5000).hide(500);
+                }).always(function() {
+                    // Reload table
+                    refreshGrid();
+                });
+            };
+
+            if (force) {
+                var opts = deleteAlert.getDefaultOpts(Lang.choice('ticket.ticket', 2), '', {{ deleteRelations|json_encode|raw }});
+
+                // Add list of tickets we're deleting.
+                opts.html = opts.html += "<br />" + ticketList(data)[0].outerHTML;
+
+                swal(opts, function (isConfirm) {
+                    if (isConfirm) {
+                        // Disable submit button
+                        deleteAlert.disableButtons();
+
+                        // Delete record and reload table if successful
+                        ajax().always(function () {
+                            swal.closeModal();
+                        });
+                    }
+                });
+            } else {
+                ajax();
+            }
+        }
+
+        /*
+         * Build a list of tickets we'll be updating.
+         */
+        function ticketList(data) {
+            var ticketList = $('<ul />')
+                .css('border', '1px solid #ddd')
+                .css('list-style-type', 'none')
+                .css('margin', 0)
+                .css('max-height', '200px')
+                .css('overflow-y', 'auto')
+                .css('padding', '0')
+                .css('text-align', 'left');
+
+            // Add each ticket to list.
+            $.each(data.split(','), function(index, value) {
+                var $tr = $('#ticketGridTable tr#' + value),
+                    $li = $('<li />').css('padding', '2px 8px');
+
+                if (index >= 1) {
+                    $li.css('border-top', '1px solid #eee')
+                }
+
+                $li.append(
+                    $('<a />').append('#' + $tr.data('number') + ' - ' + $tr.data('subject'))
+                        .prop('href', $tr.data('view_url'))
+                        .prop('target', '_blank')
+                )
+                    .append('&nbsp; (')
+                    .append($('<img />').prop('src', $tr.data('user').avatar_url)
+                        .prop('class', 'avatar')
+                        .prop('width', 18))
+                    .append('&nbsp;' + $tr.data('user').formatted_name)
+                    .append(')')
+                    .appendTo(ticketList);
+            });
+
+            return ticketList;
+        }
+
+        /*
+         * Refresh the ticket grid automatically every minute
+         */
+        function refreshGrid() {
+            clearTimeout(gridTimeout);
+
+            // Disable the grid options (buttons)
+            $('.ticket-options :input').prop('disabled', true);
+
+            // Save the row selection
+            var selection = getSelectedRows();
+            var all_selected = $('input[name="select-all"]').is(':checked');
+
+            // Update the grid
+            $('.dataTable').dataTable().api().ajax.reload(function() {
+                if (selection !== '') {
+                    // Restore the row selection
+                    var array = selection.split(","); // explode the selected rows
+
+                    // Trigger a row click for each previously selected row, this will trigger the necessary properties
+                    // and events. Keep a track of how many we click.
+                    var number_selected = 0;
+                    $.each(array, function(index, item) {
+                        if (item != '' && $('tr#'+item).length) {
+                            $('tr#'+item).trigger('click');
+                            number_selected++;
+                        }
+                    });
+
+                    // Re-check the select all checkbox (only if all rows were selected still).
+                    if (all_selected && number_selected === array.length) {
+                        $('input[name="select-all"]').prop('checked', true);
+                    }
+                }
+
+                // Re-enable the buttons
+                if ($('tr.selected').length) {
+                    $('.ticket-options :input').prop('disabled', false);
+                }
+
+                // Refresh sidebar
+                if (typeof sideBar !== 'undefined') {
+                    sideBar.refresh();
+                }
+            }, false);
+
+            // Schedule next grid update in 60 seconds.
+            gridTimeout = setTimeout(function() {
+                refreshGrid();
+            }, 60000);
+        }
+
+        // Read a page's GET URL variables and return them as an associative array.
+        function getUrlVars()
+        {
+            var vars = {}, hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for(var i = 0; i < hashes.length; i++)
+            {
+                hash = hashes[i].split('=');
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        }
+    </script>
+{% endblock %}

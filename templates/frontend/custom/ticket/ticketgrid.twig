@@ -1,0 +1,33 @@
+{% extends parent_template %}
+
+{% block title %}{{ Lang.choice('ticket.ticket', 2) }}{% endblock %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    {{ Lang.choice('ticket.ticket', 2) }}
+{% endblock %}
+
+{% block content %}
+
+    <a href="{{ route('ticket.frontend.ticket.createStep1') }}" class="button">
+        {{ Lang.get('ticket.open_new') }}
+    </a>
+
+    <br /><br />
+
+	{{ table.render()|raw }}
+	{{ table.script()|raw }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <link href="{{ asset_rev('resources/assets/frontend/css/datatables.css') }}" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.extend($.fn.dataTable.defaults, {
+                responsive: true
+            });
+        });
+    </script>
+{% endblock %}

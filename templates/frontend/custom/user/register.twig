@@ -1,0 +1,91 @@
+{% extends parent_template %}
+
+{% block title %}{{ Lang.get('user.register') }}{% endblock %}
+
+{% block scripts_header %}
+<script src="{{ asset_rev('resources/assets/frontend/js/recaptcha.js') }}"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    {{ Lang.get('user.register_account') }}
+{% endblock %}
+
+{% block content %}
+
+    {% if register_success|default is not empty and register_success %}
+
+        <div class="success box">{{ Lang.get('user.success_register') }}</div>
+        {{ Lang.get('user.success_register_desc') }}
+
+    {% else %}
+
+        {% if Session.has('social_metadata') %}
+            <div class="box options">
+                {{ Lang.get('user.social_linking_register') }}
+                <br /><br />
+                {{ Lang.get('user.already_registered') }} <a href="{{ route('user.login', {'social': 1}) }}">{{ Lang.get('user.login') }} &raquo;</a>
+            </div>
+        {% else %}
+            {% if not socialite_providers.isEmpty() %}
+                {% for provider, metadata in all_providers %}
+                    {% if socialite_providers.contains('name', provider) %}
+                        <a href="{{ route('user.oauth_redirect', {'provider': provider}) }}" class="social-login" style="background: {{ metadata.colour }};">
+                            <span class="icon">
+                                <i class="fa fa-{{ provider }} fa-fw"></i>
+                            </span> &nbsp;
+                            {{ Lang.get('user.register_with', {'provider': metadata.name }) }}
+                        </a>
+                        &nbsp;&nbsp;
+                    {% endif %}
+                {% endfor %}
+
+                <hr />
+            {% endif %}
+        {% endif %}
+
+        {{ form_open({ 'route': [ 'user.register' ], 'method': 'post', 'files': true, 'class': 'validate' }) }}
+
+            {% include 'frontend.' ~ template ~ '.user.forms.user_profile' %}
+
+            {% include 'frontend.' ~ template ~ '.user.forms.organisation' %}
+
+            {% include 'frontend.' ~ template ~ '.forms.customfields' with {'new': true} %}
+
+            {% if Config.get('settings.captcha_type') != 0 and Config.get('settings.registration_captcha') %}
+                {{ Captcha.getHtml() }}
+            {% endif %}
+
+            <div class="form-button">
+                {{ form_submit(Lang.get('user.register'), { 'class': 'btn btn-primary' }) }}
+            </div>
+
+        {{ form_close() }}
+
+    {% endif %}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <!-- Custom fields -->
+    <script src="{{ asset_rev('resources/assets/general/js/customfields.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/libs/editor.min.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/frontend/css/redactor.css') }}">
+    <script type="text/javascript">
+        $(document).ready(function() {
+            // Enable hide/show password toggle
+            callHideShowPassword();
+
+            // Date picker
+            callPikaday();
+        });
+    </script>
+
+    {% if Config.get('settings.captcha_type') != 0 and Config.get('settings.registration_captcha') %}
+        {{ Captcha.getJs() }}
+    {% endif %}
+
+    {% if jsValidator|default is not empty %}
+        {{ jsValidator|raw }}
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends parent_template %}
+
+{% block title %}{{ Lang.get('user.register') }}{% endblock %}
+
+{% block breadcrumb %}
+	{{ parent() }}
+	{{ Lang.get('user.register') }}
+{% endblock %}
+
+{% block content %}
+
+    {% if error is not defined %}
+		<div class="success box">{{ Lang.get('messages.success') }}</div>
+        {{ Lang.get('user.thank_you_confirm', { 'route': route('user.login') })|raw }}
+	{% else %}
+		<div class="fail box">{{ Lang.get('messages.error') }}</div>
+		{{ error }}
+	{% endif %}
+
+{% endblock %}

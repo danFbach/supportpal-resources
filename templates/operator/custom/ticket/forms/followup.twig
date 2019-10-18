@@ -1,0 +1,101 @@
+<form class="followup-form" data-method="{{ method }}" data-uri="{{ route }}">
+
+    <h2>{{ Lang.choice('general.detail', 2) }}</h2>
+
+    <div class="form-row">
+        {{ form_label('followup_date', Lang.get('ticket.follow_up_date')) }}
+            <div class="input-container input-group">
+                <label style="line-height: 30px;">{{ form_radio('date_type', 0, true) }} {{ Lang.get('ticket.exact_date_time') }}</label> &nbsp;
+                <label>{{ form_radio('date_type', 1) }} {{ Lang.get('ticket.time_from_now') }}</label>
+                <div class="followup-exact">
+                    {{ form_text('followup_date', ticket.followup|default is not empty
+                                ? timeWithOffset(ticket.followup.time, false)|date(Config.get('settings.date_format'))
+                                : "now"|date(Config.get('settings.date_format'), getTimezone()),
+                            { 'class': 'datepicker', 'placeholder': '&#xf073;', 'size': 12 })
+                    }}
+                    {{ form_text('followup_time', ticket.followup|default is not empty
+                                ? timeWithOffset(ticket.followup.time, false)|date('g:ia')
+                                : "now"|date('g:ia', getTimezone()),
+                            { 'class': 'timepicker', 'placeholder': '&#xf017;', 'size': 9 })
+                    }}
+                </div>
+                <div class="followup-difference hide">
+                    <div class="duration">
+                        {{ form_text('followup_days', 1, { 'size': 3 }) }}
+                        <div class="description">{{ Lang.choice('general.day', 2) }}</div>
+                    </div><div class="duration">
+                        {{ form_text('followup_hours', 0, { 'size': 3, 'style': 'border-left: 0; border-right: 0;' }) }}
+                        <div class="description">{{ Lang.choice('general.hour', 2) }}</div>
+                    </div><div class="duration">
+                        {{ form_text('followup_minutes', 0, { 'size': 3 }) }}
+                        <div class="description">{{ Lang.choice('general.minute', 2) }}</div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <div class="form-row followup-status {% if ticket.followup|default is not empty %}hide{% endif %}">
+        {{ form_label('followup_status', Lang.get('ticket.set_status')) }}
+        <div class="input-container">
+            {{ form_select('followup_status', follow_up_statuses) }}<br />
+            <span class="description">{{ Lang.get('ticket.follow_up_status_desc') }}</span>
+        </div>
+    </div>
+
+    {% if ticket.sla_plan_id|default is not empty and ticket.due_time is not empty
+        and 'now'|date('U') < ticket.due_time %}
+    <div class="form-row followup-sla {% if ticket.followup|default is not empty %}hide{% endif %}">
+        {{ form_label('followup_sla', Lang.get('ticket.pause_duetime')) }}
+        <div class="input-container">
+            {{ form_check('followup_sla', 1, 0, { 'class': 'toggle', 'id': 'toggle_followup_sla' }) }}
+            <label for="toggle_followup_sla"></label><br />
+            <span class="description">{{ Lang.get('ticket.pause_duetime_desc') }}</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <h2>{{ Lang.choice('general.action', 2) }}</h2>
+
+    <div class="form-container open first is-sortable">
+
+        {{ form_hidden('ticket_id', ticket.id, { 'disabled': 'disabled' }) }}
+
+        <table class="rule-table settings">
+            <thead>
+                <tr>
+                    <th width="14"></th>
+                    <th>{{ Lang.choice('general.action', 1) }}</th>
+                    <th>{{ Lang.get('general.value') }}</th>
+                    <th width="14"></th>
+                </tr>
+            </thead>
+            <tbody id="sortable">
+                {% include 'operator.' ~ template ~ '.ticket.forms.escalation_rule' with {'hide': true} %}
+
+                {% if ticket.followup|default is not empty %}
+                    {% for count, rule in ticket.followup.actions %}
+                        {% include 'operator.' ~ template ~ '.ticket.forms.escalation_rule' %}
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+
+        {% if can_update_ticket(auth_user(), ticket) %}
+            <div class="form-row">
+                {{ form_button(Lang.get('general.add_item', {'item': Lang.choice('general.action', 1)}), { 'class': 'add-rule' }) }}
+            </div>
+        {% endif %}
+
+    </div>
+
+    {% if can_update_ticket(auth_user(), ticket) %}
+        <div class="form-button">
+            {{ form_button(Lang.get('general.save'), { 'class': 'save-followup' }) }}
+            <span>&nbsp;&nbsp;</span>
+            {{ form_button(Lang.get('ticket.delete_follow_up'),
+                ticket.followup|default is not empty ? { 'class': 'delete-followup' } : { 'class': 'delete-followup hide' })
+            }}
+        </div>
+    {% endif %}
+
+</form>

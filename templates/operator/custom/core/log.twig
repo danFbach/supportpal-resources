@@ -1,0 +1,38 @@
+{% extends parent_template %}
+
+{% block title %}
+    {{ Lang.get('core.file_manager') }}
+{% endblock %}
+
+{% block description %}
+    {{ Lang.get('core.file_manager_desc') }}
+{% endblock %}
+
+{% block content %}
+
+    <hr />
+
+    <h2>{{ Lang.get('core.app_logs') }}</h2>
+    <h3 class="description">{{ Lang.get('core.app_logs_desc') }}</h3>
+
+    {{ appTable.render()|raw }}
+    {{ appTable.script()|raw }}
+
+    <h2>{{ Lang.get('core.email_logs') }}</h2>
+    <h3 class="description">{{ Lang.get('core.email_logs_desc') }}</h3>
+
+    {{ emailTable.render()|raw }}
+    {{ emailTable.script()|raw }}
+
+    <h2>{{ Lang.get('core.query_logs') }}</h2>
+    <h3 class="description">{{ Lang.get('core.query_logs_desc') }}</h3>
+
+    {{ queryTable.render()|raw }}
+    {{ queryTable.script()|raw }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <!-- Delete button -->
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+{% endblock %}

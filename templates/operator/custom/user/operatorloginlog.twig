@@ -1,0 +1,45 @@
+{% extends parent_template %}
+
+{% block title %}
+    {{ Lang.get('user.operator_login_log') }}
+{% endblock %}
+
+{% block content %}
+
+	<div class="grid-options options box">
+        <a class="filter-results">
+            <i class="fa fa-filter"></i>&nbsp; {{ Lang.get('general.filter_results') }}
+        </a>
+
+        <div class="filters hide">
+        	<div>
+                <label>{{ Lang.get('general.date') }}:</label>
+                <div>
+                    {{ form_text('sSearch_0_start', null, { 'class': 'datepicker', 'placeholder': '&#xf073; &nbsp;' ~ Lang.get('general.start_date'), 'size': 14 }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                    &nbsp;{{ Lang.get('general.to') }}&nbsp;
+                    {{ form_text('sSearch_0_end', null, { 'class': 'datepicker', 'placeholder': '&#xf073; &nbsp;' ~ Lang.get('general.end_date'), 'size': 14 }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.get('general.name') }}:</label>
+                <div>
+                	{{ form_select('sSearch_1', operators) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.get('general.ip_address') }}:</label>
+                <div>
+                    {{ form_text('sSearch_2', null, { 'placeholder': Lang.get('general.enter_exact_ip') }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                </div>
+            </div>
+        </div>
+	</div>
+
+	{{ table.render()|raw }}
+	{{ table.script()|raw }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/queryfiltering.js') }}"></script>
+{% endblock %}

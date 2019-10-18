@@ -1,0 +1,112 @@
+{% extends parent_template %}
+
+{% block title %}
+    {% if record|default is not empty %}
+    	{{ record.formatted_name }} -
+    {% endif %}
+    {{ Lang.get('core.email_log') }}
+{% endblock %}
+
+{% block content %}
+
+    {% if record|default is not empty %}
+        {% include 'operator.' ~ template ~ '.user.forms.user_tabs' %}
+    {% endif %}
+
+    <div class="grid-options options box">
+        <a class="filter-results">
+            <i class="fa fa-filter"></i>&nbsp; {{ Lang.get('general.filter_results') }}
+        </a>
+
+        <div class="filters hide">
+        	<div>
+                <label>{{ Lang.get('general.date') }}:</label>
+                <div>
+                    {{ form_text('sSearch_0_start', null, { 'class': 'datepicker', 'placeholder': '&#xf073; &nbsp;' ~ Lang.get('general.start_date'), 'size': 14 }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                    &nbsp;{{ Lang.get('general.to') }}&nbsp;
+                    {{ form_text('sSearch_0_end', null, { 'class': 'datepicker', 'placeholder': '&#xf073; &nbsp;' ~ Lang.get('general.end_date'), 'size': 14 }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.get('general.type') }}:</label>
+                <div>
+                	{{ form_select('sSearch_1', { '-1': Lang.get('general.select_value'), 0: Lang.get('core.outgoing'), 1: Lang.get('core.incoming'), 2: Lang.get('core.incoming_spam'), 3: Lang.get('core.incoming_throttled') }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.choice('general.recipients', 2) }}:</label>
+                <div>
+                	{{ form_text('sSearch_2', null, { 'placeholder': Lang.get('general.type_to_filter') }) }}{{ form_button('x', { 'class': 'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.get('ticket.from_name') }}:</label>
+                <div>
+                	{{ form_text('sSearch_3', null, { 'placeholder': Lang.get('general.type_to_filter') }) }}{{ form_button('x', { 'class':  'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.get('ticket.from_address') }}:</label>
+                <div>
+                	{{ form_text('sSearch_4', null, { 'placeholder': Lang.get('general.type_to_filter') }) }}{{ form_button('x', { 'class':  'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.get('ticket.subject') }}:</label>
+                <div>
+                	{{ form_text('sSearch_5', null, { 'placeholder': Lang.get('general.type_to_filter') }) }}{{ form_button('x', { 'class':  'reset-filter' }) }}
+                </div>
+            </div>
+            <div>
+                <label>{{ Lang.choice('general.message', 1) }}:</label>
+                <div>
+                	{{ form_text('sSearch_6', null, { 'placeholder': Lang.get('general.type_to_filter') }) }}{{ form_button('x', { 'class':  'reset-filter' }) }}
+                </div>
+            </div>
+        </div>
+	</div>
+
+	{{ table.render()|raw }}
+	{{ table.script()|raw }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/queryfiltering.js') }}"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(document).on('click', '.retry', function () {
+                var self = this;
+
+                swal({
+                    title: "{{ Lang.get('core.reprocess_email') }}",
+                    html: '<p>'
+                        + "{{ Lang.get('core.reprocess_email_desc') }}"
+                        + '<br /><br /><input type="text" id="textEmailLogForm" size="30" /><br /><span class="description">'
+                        + "{{ Lang.get('core.consume_all') }}"
+                    + '</span></p>',
+                    showCancelButton: true,
+                    confirmButtonText: "{{ Lang.get('general.retry') }}",
+                    closeOnConfirm: false
+                }, function () {
+                    swal.disableButtons();
+
+                    var data = { 'address': $('#textEmailLogForm').val() };
+                    $.get(laroute.route('core.operator.email.log.retry', { 'id': $(self).data('id') }), data)
+                        .done(function (data) {
+                            if (data.status !== 'success') {
+                                swal(Lang.get('messages.error'), data.message, 'error');
+                            } else {
+                                $('.dataTable').dataTable().api().ajax.reload();
+                                swal.closeModal();
+                            }
+                        })
+                        .fail(function (jqXHR, textStatus, errorThrown) {
+                            swal(Lang.get('messages.error'), jqXHR.responseText, 'error');
+                        });
+                });
+            });
+        });
+    </script>
+{% endblock %}

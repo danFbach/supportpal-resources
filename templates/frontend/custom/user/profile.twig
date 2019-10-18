@@ -1,0 +1,71 @@
+{% extends parent_template %}
+
+{% block title %}{{ Lang.get('user.profile') }}{% endblock %}
+
+{% block breadcrumb %}
+    {{ parent() }}
+    {{ Lang.get('user.profile') }}
+{% endblock %}
+
+{% block content %}
+
+    {{ form_model(record, { 'route': [ 'user.profile.update' ], 'method': 'PUT', 'files': true, 'class': 'validate' }) }}
+
+        {% include 'frontend.' ~ template ~ '.user.forms.user_profile' %}
+
+        {% include 'frontend.' ~ template ~ '.user.forms.organisation' %}
+
+        {% include 'frontend.' ~ template ~ '.forms.customfields' %}
+
+        <div class="form-button">
+            {{ form_submit(Lang.get('general.save')) }}
+        </div>
+
+    {{ form_close() }}
+
+    <form id="leaveOrganisation" action="{{ route('user.organisation.leaveOrganisation') }}" method="POST"></form>
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <!-- Custom fields -->
+    <script src="{{ asset_rev('resources/assets/general/js/customfields.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/libs/editor.min.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/frontend/css/redactor.css') }}">
+
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            // Enable hide/show password toggle
+            callHideShowPassword();
+
+            // Date picker
+            callPikaday();
+
+            // Update language variables.
+            deleteAlert.translationKeys.title = '{{ Lang.get('messages.leave_record', {'record': Lang.choice('user.organisation', 1)}) }}';
+            deleteAlert.translationKeys.warning = '{{ Lang.get('messages.leave_record_warn', {'record': Lang.choice('user.organisation', 1) }) }}';
+            deleteAlert.translationKeys.confirmButton = '{{ Lang.get('general.yes') }}';
+            deleteAlert.translationKeys.cancelButton = '{{ Lang.get('general.no') }}';
+
+            // Leave organisation button for managers and users of an organisation
+            $('.leave-organisation').on('click', function() {
+                swal(deleteAlert.getDefaultOpts(Lang.choice('user.organisation', 1)), function(isConfirm) {
+                    if (isConfirm) {
+                        swal.disableButtons();
+
+                        var input = $("<input>").attr("type", "hidden")
+                            .attr("name", "_token")
+                            .val($('meta[name=csrf_token]').prop('content'));
+
+                        $('form#leaveOrganisation').append($(input)).trigger('submit');
+                    }
+                });
+            });
+        });
+    </script>
+
+    {% if jsValidator|default is not empty %}
+        {{ jsValidator|raw }}
+    {% endif %}
+{% endblock %}

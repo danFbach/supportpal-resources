@@ -1,0 +1,137 @@
+{% extends parent_template %}
+
+{% block title %}
+    {{ Lang.choice('selfservice.type', 2) }}
+{% endblock %}
+
+{% block breadcrumb %}
+    {{ Lang.get('selfservice.selfservice') }}
+    &nbsp;&nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i>&nbsp;&nbsp;
+    {{ brand.name }}
+    &nbsp;&nbsp;<i class="fa fa-chevron-right" aria-hidden="true"></i>&nbsp;&nbsp;
+    <strong>{{ Lang.choice('selfservice.type', 2) }}</strong>
+{% endblock %}
+
+{% block content %}
+
+    <ul class="tabs">
+        <li id="Public" class="active">{{ Lang.get('general.public') }}</li>
+        <li id="Internal">{{ Lang.get('selfservice.internal') }}</li>
+    </ul>
+
+    <div id="tabPublic" class="tabContent">
+        <div class="options box">
+            <a href="{{ route('selfservice.operator.type.create', brand.id) }}">
+                <i class="fa fa-plus"></i>&nbsp; {{ Lang.get('general.add_item', {'item': Lang.choice('selfservice.type', 1)}) }}
+            </a>
+            &nbsp;&nbsp;
+            <a class="filter-results">
+                <i class="fa fa-filter"></i>&nbsp; {{ Lang.get('general.filter_results') }}
+            </a>
+
+            <div class="filters hide">
+                <div>
+                    <label>{{ Lang.get('general.name') }}:</label>
+                    <div id="filter_public_name"></div>
+                </div>
+                <div>
+                    <label>{{ Lang.get('general.enabled') }}:</label>
+                    <div id="filter_public_enabled"></div>
+                </div>
+                <div>
+                    <label>{{ Lang.get('general.content') }}:</label>
+                    <div id="filter_public_content"></div>
+                </div>
+                <div>
+                    <label>{{ Lang.choice('general.view', 1) }}:</label>
+                    <div id="filter_public_view"></div>
+                </div>
+            </div>
+        </div>
+
+        {{ publicTable.render()|raw }}
+        {{ publicTable.script()|raw }}
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+                /**
+                 * Initialise the filters
+                 */
+                oTable.yadcf([
+                    {column_number : 0, column_data_type: "text", filter_container_id: "filter_public_name", filter_type: "text", filter_delay: 500},
+                    {column_number : 1, filter_container_id: "filter_public_enabled"},
+                    {column_number : 2, filter_container_id: "filter_public_content"},
+                    {column_number : 3, filter_container_id: "filter_public_view"}
+                ]);
+            });
+        </script>
+    </div>
+
+    <div id="tabInternal" class="tabContent hide">
+        <div class="options box">
+            <a href="{{ route('selfservice.operator.type.create', {'brand': brand.id, 'internal': 1}) }}">
+                <i class="fa fa-plus"></i>&nbsp; {{ Lang.get('general.add_item', {'item': Lang.choice('selfservice.type', 1)}) }}
+            </a>
+            &nbsp;&nbsp;
+            <a class="filter-results">
+                <i class="fa fa-filter"></i>&nbsp; {{ Lang.get('general.filter_results') }}
+            </a>
+
+            <div class="filters hide">
+                <div>
+                    <label>{{ Lang.get('general.name') }}:</label>
+                    <div id="filter_internal_name"></div>
+                </div>
+                <div>
+                    <label>{{ Lang.get('general.enabled') }}:</label>
+                    <div id="filter_internal_enabled"></div>
+                </div>
+                <div>
+                    <label>{{ Lang.get('general.content') }}:</label>
+                    <div id="filter_internal_content"></div>
+                </div>
+                <div>
+                    <label>{{ Lang.choice('general.view', 1) }}:</label>
+                    <div id="filter_internal_view"></div>
+                </div>
+            </div>
+        </div>
+
+        {{ internalTable.render()|raw }}
+        {{ internalTable.script()|raw }}
+    </div>
+
+    <div class="note box bottombox" id="dndOrderNote">
+        <strong>{{ Lang.choice('general.note', 1) }}:</strong> {{ Lang.get('selfservice.type_order') }}
+    </div>
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <!-- Deleting records from the table -->
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+
+    <!-- Ordering -->
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/ordering.js') }}"></script>
+
+    <!-- Filtering and delay loading some tables -->
+    <script src="{{ asset_rev('resources/assets/operator/js/datatable/deferloading.js') }}"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            /**
+             * Initialise the filters
+             */
+            oTable.yadcf([
+                {column_number : 0, column_data_type: "text", filter_container_id: "filter_internal_name", filter_type: "text", filter_delay: 500},
+                {column_number : 1, filter_container_id: "filter_internal_enabled"},
+                {column_number : 2, filter_container_id: "filter_internal_content"},
+                {column_number : 3, filter_container_id: "filter_internal_view"}
+            ]);
+
+            /**
+             * Defer loading internal datatable
+             */
+            defferedDatatables({ 'Internal': false });
+        });
+    </script>
+{% endblock %}
