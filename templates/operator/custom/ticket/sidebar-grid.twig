@@ -1,0 +1,176 @@
+<div id="sidebar" class="sidebar-close left">
+    {{ View.fireHook('operator.sidebar_start') }}
+
+    <span class="toggle-sidebar hide">
+        <i class="fa fa-angle-double-right"></i>
+    </span>
+
+    {% if filters is not empty and not filters.isEmpty() %}
+        <div class="sidebox">
+            <h3 class="collapsable" id="ticketFiltersSidebox">
+                <i class="fa fa-filter icon"></i>
+                {{ Lang.choice('ticket.filter', 2) }}
+                <div class="arrow">
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+            </h3>
+            <ul class="filter-list with-badge tickets">
+                {% for filter in filters %}
+                    <li>
+                        <a href="{{ route('ticket.operator.ticket') ~ '?filter=' ~ filter.id }}">
+                            <span class="badge right hide" data-id="{{ filter.id }}"></span>
+                            <div class="list-item" {% if Input.get('filter', 0) == filter.id|trim %}style="font-weight: bold;"{% endif %}>
+                                {{ filter.name }}
+                            </div>
+                        </a>
+                    </li>
+                {% endfor %}
+                <li>
+                    <a href="{{ route('ticket.operator.trashed_tickets') }}" {% if Route.currentRouteName() == 'ticket.operator.trashed_tickets' %}style="font-weight: bold;"{% endif %}>
+                        <i class="fa fa-trash"></i>&nbsp; {{ Lang.get('general.trash') }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    {% endif %}
+    <div class="sidebox">
+        <h3 class="collapsable" id="departmentsSidebox">
+            <i class="fa fa-folder icon"></i>
+            {{ Lang.choice('ticket.department', 2) }}
+            <div class="arrow">
+                <i class="fa fa-chevron-down"></i>
+            </div>
+        </h3>
+        <ul class="department-list with-badge">
+            {% for department in obj_departments %}
+                <li>
+                    <a href="{{ route('ticket.operator.ticket') ~ '?department=' ~ department.id ~ '&status=' ~ non_resolved_statuses }}">
+                        <span class="badge right hide" data-id="{{ department.id }}"></span>
+                        <div class="list-item" {% if Input.get('department', 0) == department.id|trim %}style="font-weight: bold;"{% endif %}>
+                            {% if department.dashes|default is not empty %}
+                                {{ department.dashes|raw }}{{ department.name|replace({ (department.dashes): '' }) }}
+                            {% else %}
+                                {{ department.name }}
+                            {% endif %}
+                        </div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="sidebox">
+        <h3 class="collapsable" id="ticketStatusesSidebox">
+            <i class="fa fa-circle-o icon"></i>
+            {{ Lang.choice('general.status', 2) }}
+            <div class="arrow">
+                <i class="fa fa-chevron-down"></i>
+            </div>
+        </h3>
+        <ul class="status-list with-badge">
+            {% for status in obj_statuses %}
+                <li>
+                    <a href="{{ route('ticket.operator.ticket') ~ '?status=' ~ status.id }}">
+                        <span class="badge right hide" data-id="{{ status.id }}"></span>
+                        <div class="list-item" {% if Input.get('status', 0) == status.id|trim %}style="font-weight: bold;"{% endif %}>
+                            <span class="statusIcon" style="background: {{ status.colour }};"></span>&nbsp;
+                            {{ status.name }}
+                        </div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% if obj_brands|length > 1 %}
+        <div class="sidebox">
+            <h3 class="collapsable" id="brandsSidebox">
+                <i class="fa fa-sitemap icon"></i>
+                {{ Lang.choice('core.brand', 2) }}
+                <div class="arrow">
+                    <i class="fa fa-chevron-down"></i>
+                </div>
+            </h3>
+            <ul class="brand-list with-badge">
+                {% for brand in obj_brands %}
+                    <li>
+                        <a href="{{ route('ticket.operator.ticket') ~ '?brand=' ~ brand.id }}">
+                            <span class="badge right hide" data-id="{{ brand.id }}"></span>
+                            <div class="list-item" {% if Input.get('brand', 0) == brand.id|trim %}style="font-weight: bold;"{% endif %}>
+                                {{ brand.name }}
+                            </div>
+                        </a>
+                    </li>
+                {% else %}
+                    {{ Lang.get('general.none') }}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <div class="sidebox">
+        <h3 class="collapsable" id="ticketPrioritySidebox">
+            <i class="fa fa-flag icon"></i>
+            {{ Lang.choice('ticket.priority', 2) }}
+            <div class="arrow">
+                <i class="fa fa-chevron-down"></i>
+            </div>
+        </h3>
+        <div class="priority-list">
+            {% for priority in obj_priorities %}
+                <a class="tag" href="{{ route('ticket.operator.ticket') ~ '?priority=' ~ priority.id }}"
+                   style="background: {{ priority.colour }}; color: {{ priority.colour_text }};">
+                    {{ priority.name }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% if obj_tags is not empty and not obj_tags.isEmpty() %}
+    <div class="sidebox">
+        <h3 class="collapsable" id="ticketTagsSidebox">
+            <i class="fa fa-tags icon"></i>
+            {{ Lang.choice('ticket.tag', 2) }}
+            <div class="arrow">
+                <i class="fa fa-chevron-down"></i>
+            </div>
+        </h3>
+        <div class="tag-list">
+            {% for tag in obj_tags %}
+                <a class="tag" href="{{ route('ticket.operator.ticket') ~ '?tag=' ~ tag['id'] }}"
+                    style="background: {{ tag['colour'] }}; color: {{ tag['colour_text'] }};">
+                    {{ tag['name'] }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% if not recentActivity.isEmpty() %}
+    <div class="sidebox">
+        <h3 class="collapsable" id="recentActivitySidebox">
+            <i class="fa fa-clock-o icon"></i>
+            {{ Lang.get('ticket.recent_activity') }}
+            <div class="arrow">
+                <i class="fa fa-chevron-down"></i>
+            </div>
+        </h3>
+        <ul class="recent-activity">
+            <span class="description">{{ Lang.get('general.loading') }}...</span>
+        </ul>
+    </div>
+    {% endif %}
+    {% if not activeOperators.isEmpty() %}
+    <div class="sidebox">
+        <h3 class="collapsable" id="activeOperatorsSidebox">
+            <i class="fa fa-users icon"></i>
+            {{ Lang.get('ticket.active_operators') }}
+            <div class="arrow">
+                <i class="fa fa-chevron-down"></i>
+            </div>
+        </h3>
+        <ul class="active-operators">
+            <span class="description">{{ Lang.get('general.loading') }}...</span>
+        </ul>
+    </div>
+    {% endif %}
+
+    {{ View.fireHook('operator.sidebar_end') }}
+
+    <div class="copyright">{{ Lang.get('core.carefully_crafted') }} <a href="https://www.supportpal.com">{{ Lang.get('core.product_name') }}</a>.</div>
+</div>

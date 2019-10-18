@@ -1,0 +1,12 @@
+{# <li>
+    <a href="{{ __category.frontend_url }}">{% if __category.count is not empty %}<span class="badge">{{ __category.count }}</span>{% endif %}
+    <div class="nav-item" {% if currentCategory is not empty and currentCategory == __category.id %}style="font-weight: bold;"{% endif %}>{{ __category.dashes|raw }}&nbsp;{{ __category.name }}</div>
+    </a>
+    <ul>
+    </ul>
+</li>
+{% for ___category in categories %}
+{% if ___category.parent_id == currend_id %}
+{{ include('categories_called.twig', { current_id: _category.id, __category: ___category })}}
+{% endif %}
+{% endfor %} #}

@@ -1,0 +1,175 @@
+{% extends parent_template %}
+{% block title %}{{ Lang.get('ticket.open_new') }}{% endblock %}
+{% block scripts_header %}<script src="{{ asset_rev('resources/assets/frontend/js/recaptcha.js') }}"></script>{% endblock %}
+{% block breadcrumb %}{{ parent() }}{{ Lang.get('ticket.open_new') }}{% endblock %}
+{% block content %}
+    {{ form_open({ 'route': [ 'ticket.frontend.ticket.storeStep3' ], 'class': 'validate' }) }}
+        {% if not auth_check() %}{{ form_hidden('email', email) }}{% endif %}
+        <h2>{{ Lang.get('ticket.enter_ticket_details') }}</h2>
+        <div>
+            <b>Please allow up to 48 hours during the work week for a response.</b><br><br>
+            <b><font color="red">Looking for a replacement part?</font></b>
+             There are two options to obtain a replacement part:<br><br>
+             The first replacement part is free, you are just responsible for the shipping to your residence. You can place your order for the part on our <a href="http://www.leeprecision.com" target="_blank">website</a>. The free part will appear once you add the item into the shopping cart.<br><br>
+             -or-<br><br>
+             Mail the part in to the factory below for a no charge replacement.<br><br>
+             Lee Precision, Inc.<br>
+             4275 Highway U<br>
+             Hartford, WI 53027<br><br><br>
+         </div>
+        <div class="form-container first">
+            <div class="form-row">{{ form_label('department', Lang.choice('ticket.department', 1)) }}<div class="input-container">{{ form_hidden('department', department.id) }}<span class="department-name">{{ department.frontend_name }}</span></div></div>
+            <input type="hidden" name="priority" value="1" />
+            {#<div class="form-row">
+                {{ form_label('priority', Lang.choice('ticket.priority', 1)) }}
+                <div class="input-container">
+                    {{ form_select('priority', department_priorities, null, {'autofocus': 'autofocus'}) }}
+                </div>
+            </div>#}
+            {% if organisationUsers is not empty %}
+            <div class="form-row">
+                {{ form_label('organisationUsers', Lang.get('user.organisation_users')) }}
+                <div class="input-container">
+                    {{ organisationUsers.implode(', ') }}<br />
+                    <span class="light">{{ Lang.get('user.organisation_users_ticket') }}</span>
+                </div>
+            </div>
+            {% endif %}
+            {#<div class="form-row">
+                {{ form_label('cc[]', Lang.get('ticket.cc')) }}
+                <div class="input-container">
+                    {{ form_select('cc[]', [], [], { 'multiple': 'multiple' }) }}
+                    <span class="light">{{ Lang.get('ticket.cc_desc') }}</span>
+                </div>
+            </div>#}
+        </div>
+        <hr />
+        <div class="fail attachment box hide"></div>
+        <div class="form-container first">
+            <div class="form-row form-full" id="subj-container">
+                {{ form_label('subject', Lang.get('ticket.subjectReplace')) }}
+                <div class="input-container">
+                    {{ form_text('subject') }}
+                </div>
+            </div>
+            <div class="suggested-articles hide" style="background: #f0f0f0; border-radius: 5px; margin-bottom: 25px; padding: 25px;">
+                <h3 class="margin0">{{ Lang.get('selfservice.related_articles') }}</h3>
+                <div class="articles-list"></div>
+            </div>
+
+            <div class="form-row">
+                {{ form_label('text', Lang.choice('general.message', 1)) }}
+                <div class="input-container">
+                    {{ form_redactor('text', null, { 'size': '50x3' }) }}
+
+                    <div class="attachment-details">
+                        <input type="hidden" name="attachment[]" disabled="disabled" />
+                        {% if Input.old() is not empty and Input.old()['attachment'] is not empty %}
+                            {% for hash, file in Input.old()['attachment'] %}
+                                <input type="hidden" name="attachment[{{ hash }}]" id="attachment[{{ hash }}]" value="{{ file }}" />
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <ul class="attached-files">
+                        <li class="hide">
+                            <i class="fa fa-file"></i>
+                            &nbsp;
+                            <span class="information">
+                                <span class="filename ellipsis"></span>
+                                &nbsp;
+                                <span class="filesize"></span>
+                            </span>
+                            <i class="fa fa-times deleteAttachment right hide"></i>
+                            <div class="progress">
+                                <div class="bar"></div>
+                            </div>
+                        </li>
+                        {% if Input.old() is not empty and Input.old()['attachment'] is not empty %}
+                            {% for hash, file in Input.old()['attachment'] %}
+                                <li>
+                                    <i class="fa fa-file"></i>
+                                    &nbsp;
+                                    <span class="information">
+                                        <span class="filename ellipsis">{{ file }}</span>
+                                    </span>
+                                    <i class="fa fa-times deleteAttachment right"
+                                        data-url="{{ route("ticket.frontend.attachment.destroy") }}"
+                                        data-hash="{{ hash }}"></i>
+                                    <div class="progress">
+                                        <div class="bar"></div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+
+                    <div class="attachment-dragover hide">
+                        {{ Lang.get('general.drag_and_drop') }}
+                    </div>
+
+                    <label class="file-input button">
+                        <i class="fa fa-paperclip"></i>&nbsp; {{ Lang.get('general.add_attachment') }}
+                        <input class="fileupload" type="file" name="files[]"
+                               data-url="{{ route('ticket.frontend.attachment.upload') }}" multiple="multiple">
+                    </label>
+                </div>
+            </div>
+
+            {% include 'frontend.' ~ template ~ '.forms.customfields' with {'new': true} %}
+
+        </div>
+
+        {% if Config.get('settings.captcha_type') != 0
+            and (Config.get('channel.web.settings.show_captcha') == 2 or (not auth_check() and Config.get('channel.web.settings.show_captcha') == 1))
+        %}
+            {{ Captcha.getHtml() }}
+        {% endif %}
+
+        <div class="form-button">
+            {{ form_submit(Lang.choice('general.submit', 1)) }}
+        </div>
+
+    {{ form_close() }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    <script type="text/javascript">
+        // If we should attempt to fetch related articles
+        var relatedArticlesEnabled;
+        {% if isModuleEnabled('Selfservice') and Config.get('channel.web.settings.show_related_articles') %}
+            relatedArticlesEnabled = true;
+        {% else %}
+            relatedArticlesEnabled = false;
+        {% endif %}
+    </script>
+
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/frontend/js/newticket.js') }}"></script>
+
+    <script src="{{ asset_rev('resources/assets/libs/editor.min.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/general/js/redactor_config.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/frontend/css/redactor.css') }}">
+
+    <!-- Attachments: dependencies = sweet alerts and jquery fileupload -->
+    <script src="{{ asset_rev('resources/assets/general/js/fileupload.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+    <script type="text/javascript">
+        new FileUpload();
+    </script>
+
+    <!-- Custom fields -->
+    <script src="{{ asset_rev('resources/assets/general/js/customfields.js') }}"></script>
+    <!-- Sort Custom Fields -->
+    <script>$(document).ready(function(){ $('div.form-customfields[data-field="8"]').insertBefore($('#subj-container')); });</script>
+
+    {% if Config.get('settings.captcha_type') != 0
+        and (Config.get('channel.web.settings.show_captcha') == 2 or (not auth_check() and Config.get('channel.web.settings.show_captcha') == 1))
+    %}
+        {{ Captcha.getJs() }}
+    {% endif %}
+
+    {% if jsValidator|default is not empty %}
+        {{ jsValidator|raw }}
+    {% endif %}
+{% endblock %}

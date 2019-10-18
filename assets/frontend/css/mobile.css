@@ -273,6 +273,7 @@ html {
 
     .logo {
         margin-left: 20px;
+        max-width: calc(100% - 100px);
     }
 
     .mobile_nav_button .fa {
