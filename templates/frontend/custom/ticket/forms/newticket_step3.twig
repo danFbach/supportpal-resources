@@ -5,7 +5,6 @@
 {% block content %}
     {{ form_open({ 'route': [ 'ticket.frontend.ticket.storeStep3' ], 'class': 'validate' }) }}
         {% if not auth_check() %}{{ form_hidden('email', guest_user.email) }}{% endif %}
-        {#{{form_hidden('email', email) }}#}
         <h2>{{ Lang.get('ticket.enter_ticket_details') }}</h2>
         <div>
             <b>Please allow up to 48 hours during the work week for a response.</b><br><br>
