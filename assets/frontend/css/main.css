@@ -396,7 +396,8 @@ h2.collapsable .fa {
 /* Header */
 
 #desk_header {
-    background: #fff;
+    /* background: #fff; */
+    background: #da3230; /* banner color to match accent */
     border-bottom: 1px solid #e0e0e0;
     margin-bottom: 30px;
     padding: 15px 0;
@@ -445,13 +446,19 @@ h2.collapsable .fa {
     height: 30px;
     padding-left: 30px;
     width: 100%;
+    transition: all 0.25s ease-in-out;
+    box-shadow: 0 0 0;
 }
 
+.searchbox input:hover,
 .searchbox input:focus {
-    border: solid 1px #ddd;
-    -webkit-box-shadow: 0 0 6px rgba(152, 152, 152, .35);
-    -moz-box-shadow: 0 0 6px rgba(152, 152, 152, .35);
-    box-shadow: 0 0 6px rgba(152, 152, 152, .35);
+    /* -webkit-box-shadow: 0 0 6px rgba(152, 152, 152, .35); */
+    /* -moz-box-shadow: 0 0 6px rgba(152, 152, 152, .35); */
+    /* box-shadow: 0 0 6px rgba(152, 152, 152, .35); */
+    -webkit-box-shadow: 0 0 6px #FFF;
+    -moz-box-shadow: 0 0 6px #FFF;
+    box-shadow: 0 0 6px #FFF;
+    transition: all 0.25s ease-in-out;
     color: #000;
 }
 
@@ -1820,4 +1827,14 @@ iframe[src="about:blank"] {
     border-bottom-right-radius: 3px;
     border-left: 0;
     padding: 1px 8px 3px 8px;
+}
+
+/* override brand accent color */
+
+input[type="submit"]:hover, a.button-submit:hover, .white-box button:not(.confirm):hover,
+.white-box .button.primary:hover, #header .logo, #header input.search, ul.dropdown li.hover,
+ul.dropdown ul a:hover, ul.dropdown ul a:hover .description, ul.dropdown2 ul a:hover,
+ul.dropdown2 ul a:hover .fa, #navarea a.nav:hover, #navarea a.activeParent, ul.dropdown li:hover > a.activeParent,
+#header .search.ui-autocomplete-loading, #header .mobile-nav .fa:hover, #header .mobile-nav.active .fa {
+	background: #da3230 !important;
 }

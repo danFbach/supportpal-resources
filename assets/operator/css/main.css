@@ -2669,3 +2669,14 @@ input.timepicker {
     border-top: 1px solid #e9e9e9;
     padding: 10px;
 }
+
+
+/* override brand accent color */
+
+input[type="submit"]:hover, a.button-submit:hover, .white-box button:not(.confirm):hover,
+.white-box .button.primary:hover, #header .logo, #header input.search, ul.dropdown li.hover,
+ul.dropdown ul a:hover, ul.dropdown ul a:hover .description, ul.dropdown2 ul a:hover,
+ul.dropdown2 ul a:hover .fa, #navarea a.nav:hover, #navarea a.activeParent, ul.dropdown li:hover > a.activeParent,
+#header .search.ui-autocomplete-loading, #header .mobile-nav .fa:hover, #header .mobile-nav.active .fa {
+	background: #da3230 !important;
+}
