@@ -1823,6 +1823,10 @@ iframe[src="about:blank"] {
             position: relative;
         }
 
+            #desk_sidebar ul.ad_nav li a.current {
+                background: transparent;
+            }
+
             #desk_sidebar ul.ad_nav li a:hover {
                 background: transparent;
             }
@@ -1838,7 +1842,7 @@ iframe[src="about:blank"] {
 
 #desk_sidebar ul li span.list_expand {
     position: absolute;
-    left: -12px;
+    left: -16px;
     top: 7px;
     display: inline-block;
     cursor: pointer;
@@ -1874,6 +1878,21 @@ iframe[src="about:blank"] {
         color: #c10000;
     }
 
+.dealer-table {
+}
+
+    .dealer-table img {
+        max-width: 300px;
+        height: auto;
+        margin: 0 auto;
+        display: block;
+        max-height: 175px;
+    }
+
+    .dealer-table td {
+        width: 50%;
+        border: 1px solid #f0f0f0;
+    }
 /*
     END CUSTOM
 */
