@@ -34,6 +34,28 @@
         </div>
     {% endif %}
     <div class="sidebox">
+        <h3 class="collapsable" id="ticketStatusesSidebox">
+            <i class="fa fa-circle-o icon"></i>
+            {{ Lang.choice('general.status', 2) }}
+            <div class="arrow">
+                <i class="fa fa-chevron-down"></i>
+            </div>
+        </h3>
+        <ul class="status-list with-badge">
+            {% for status in obj_statuses %}
+                <li>
+                    <a href="{{ route('ticket.operator.ticket') ~ '?status=' ~ status.id }}">
+                        <span class="badge right hide" data-id="{{ status.id }}"></span>
+                        <div class="list-item" {% if Input.get('status', 0) == status.id|trim %}style="font-weight: bold;"{% endif %}>
+                            <span class="statusIcon" style="background: {{ status.colour }};"></span>&nbsp;
+                            {{ status.name }}
+                        </div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="sidebox">
         <h3 class="collapsable" id="departmentsSidebox">
             <i class="fa fa-folder icon"></i>
             {{ Lang.choice('ticket.department', 2) }}
@@ -52,28 +74,6 @@
                             {% else %}
                                 {{ department.name }}
                             {% endif %}
-                        </div>
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-    <div class="sidebox">
-        <h3 class="collapsable" id="ticketStatusesSidebox">
-            <i class="fa fa-circle-o icon"></i>
-            {{ Lang.choice('general.status', 2) }}
-            <div class="arrow">
-                <i class="fa fa-chevron-down"></i>
-            </div>
-        </h3>
-        <ul class="status-list with-badge">
-            {% for status in obj_statuses %}
-                <li>
-                    <a href="{{ route('ticket.operator.ticket') ~ '?status=' ~ status.id }}">
-                        <span class="badge right hide" data-id="{{ status.id }}"></span>
-                        <div class="list-item" {% if Input.get('status', 0) == status.id|trim %}style="font-weight: bold;"{% endif %}>
-                            <span class="statusIcon" style="background: {{ status.colour }};"></span>&nbsp;
-                            {{ status.name }}
                         </div>
                     </a>
                 </li>

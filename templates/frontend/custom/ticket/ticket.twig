@@ -1,6 +1,7 @@
 {% extends parent_template %}
 
 {% block meta %}
+    <meta name="robots" content="noindex" />
     {% if download %}
         <meta http-equiv="refresh" content="2;{{ download.direct_frontend_url }}" />
     {% endif %}

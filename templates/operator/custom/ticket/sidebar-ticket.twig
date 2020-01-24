@@ -130,7 +130,7 @@
                     </td>
                 </tr>
                 {% if can_update_ticket(auth_user(), ticket) %}
-                {#<tr>
+                <tr>
                     <td colspan="2">
                         <select class="assign-tags" name="tag[]" multiple="multiple">
                             {% for tag in ticket.tags.sortBy('name') %}
@@ -140,7 +140,7 @@
                             {% endfor %}
                         </select>
                     </td>
-                </tr>#}
+                </tr>
                 <tr>
                     <td colspan="2">
                         <select id="assignOperator" name="operator[]" multiple="multiple">
@@ -153,7 +153,7 @@
                     </td>
                 </tr>
                 {% endif %}
-                {#{% if not slaplans.isEmpty() %}
+                {% if not slaplans.isEmpty() %}
                 <tr>
                     <th>{{ Lang.choice('ticket.sla_plan', 1) }}</th>
                     <td>
@@ -218,7 +218,7 @@
                             {{ timeago(ticket.updated_at) }}
                         </span>
                     </td>
-                </tr>#}
+                </tr>
             </table>
             <br />
             <div class="linked-tickets-list">
@@ -233,6 +233,12 @@
         {% for view in extendedViews['sidebar-ticket'] %}
             {% include view %}
         {% endfor %}
+    {% endif %}
+
+    {% if overriddenViews['sidebar-ticket'] is not empty %}
+        {% include overriddenViews['sidebar-ticket'] %}
+    {% else %}
+        {% include 'operator.' ~ template ~ '.ticket.sidebar-ticket_user' %}
     {% endif %}
 
     {% if not macros.isEmpty() and can_update_ticket(auth_user(), ticket) %}
@@ -251,6 +257,7 @@
         </div>
     </div>
     {% endif %}
+
     <div class="sidebox {% if customfields is empty %}hide{% endif %}">
         <h3 class="collapsable" id="ticketCustomfieldSidebox">
             <i class="fa fa-file-text icon"></i>
@@ -296,13 +303,7 @@
     </div>
     {% endif %}
 
-    {{ View.fireHook('operator.sidebar_end') }}    
-
-    {% if overriddenViews['sidebar-ticket'] is not empty %}
-        {% include overriddenViews['sidebar-ticket'] %}
-    {% else %}
-        {% include 'operator.' ~ template ~ '.ticket.sidebar-ticket_user' %}
-    {% endif %}
+    {{ View.fireHook('operator.sidebar_end') }}
 
     <div class="copyright">
         {{ Lang.get('core.carefully_crafted') }} <a href="https://www.supportpal.com">{{ Lang.get('core.product_name') }}</a>.

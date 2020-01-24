@@ -7,7 +7,7 @@
                     <li id="li-{{ category.id }}"><span class="list_expand" id="expand-{{ category.id }}"></span>
                         <a href="{{ category.frontend_url }}" title="{{ category.name }}">
                             {% if category.count is not empty %}<span class="badge">{{ category.count }}</span>{% endif %}
-                            <div class="nav-item" {% if currentCategory is not empty and currentCategory == category.id %}style="font-weight: bold;"{% endif %}>{{ category.dashes|raw }}&nbsp;{{ category.name }}</div>
+                            <div class="nav-item" {% if currentCategory is not empty and currentCategory == category.id %}style="font-weight: bold;"{% endif %}>{{ category.dashes|raw }}{{ category.name }}</div>
                         </a>
                         <ul id="ul-{{ category.id }}" class="hidden">
                             {% for _category in categories %}
@@ -15,7 +15,7 @@
                                     <li id="li-{{ _category.id }}"><span class="list_expand" id="expand-{{ _category.id }}"></span>
                                         <a href="{{ _category.frontend_url }}" title="{{ _category.name }}">
                                             {% if _category.count is not empty %}<span class="badge">{{ _category.count }}</span>{% endif %}
-                                            <div class="nav-item" {% if currentCategory is not empty and currentCategory == _category.id %}style="font-weight: bold;"{% endif %}>{{ _category.dashes|raw }}&nbsp;{{ _category.name }}</div>
+                                            <div class="nav-item" {% if currentCategory is not empty and currentCategory == _category.id %}style="font-weight: bold;"{% endif %}>{{ _category.dashes|raw }}{{ _category.name }}</div>
                                         </a>
                                         <ul id="ul-{{ _category.id }}" class="hidden">
                                             {% for __category in categories %}
@@ -23,7 +23,7 @@
                                                     <li id="li-{{ __category.id }}"><span class="list_expand" id="expand-{{ __category.id }}"></span>
                                                         <a href="{{ __category.frontend_url }}" title="{{ __category.name }}">
                                                             {% if __category.count is not empty %}<span class="badge">{{ __category.count }}</span>{% endif %}
-                                                            <div class="nav-item" {% if currentCategory is not empty and currentCategory == __category.id %}style="font-weight: bold;"{% endif %}>{{ __category.dashes|raw }}&nbsp;{{ __category.name }}</div>
+                                                            <div class="nav-item" {% if currentCategory is not empty and currentCategory == __category.id %}style="font-weight: bold;"{% endif %}>{{ __category.dashes|raw }}{{ __category.name }}</div>
                                                         </a>
                                                         <ul id="ul-{{ __category.id }}" class="hidden">
                                                             {% for ___category in categories %}
@@ -31,7 +31,7 @@
                                                                     <li id="li-{{ ___category.id }}"><span class="list_expand" id="expand-{{ ___category.id }}"></span>
                                                                         <a href="{{ ___category.frontend_url }}" title="{{ ___category.name }}">
                                                                             {% if ___category.count is not empty %}<span class="badge">{{ ___category.count }}</span>{% endif %}
-                                                                            <div class="nav-item" {% if currentCategory is not empty and currentCategory == ___category.id %}style="font-weight: bold;"{% endif %}>{{ ___category.dashes|raw }}&nbsp;{{ ___category.name }}</div>
+                                                                            <div class="nav-item" {% if currentCategory is not empty and currentCategory == ___category.id %}style="font-weight: bold;"{% endif %}>{{ ___category.dashes|raw }}{{ ___category.name }}</div>
                                                                         </a>
                                                                         <ul id="ul-{{ ___category.id }}" class="hidden">
                                                                             {% for ____category in categories %}
@@ -39,7 +39,7 @@
                                                                                     <li>
                                                                                         <a href="{{ ____category.frontend_url }}" title="{{ ____category.name }}">
                                                                                             {% if ____category.count is not empty %}<span class="badge">{{ ____category.count }}</span>{% endif %}
-                                                                                            <div class="nav-item" {% if currentCategory is not empty and currentCategory == ____category.id %}style="font-weight: bold;"{% endif %}>{{ ____category.dashes|raw }}&nbsp;{{ ____category.name }}</div>
+                                                                                            <div class="nav-item" {% if currentCategory is not empty and currentCategory == ____category.id %}style="font-weight: bold;"{% endif %}>{{ ____category.dashes|raw }}{{ ____category.name }}</div>
                                                                                         </a>
                                                                                     </li>
                                                                                 {% endif %}

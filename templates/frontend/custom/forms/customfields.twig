@@ -13,7 +13,7 @@
          data-dependent-children="{{ customfield.children|json_encode }}"
          data-depends-on-option="{{ customfield.depends_on_option_id }}"
          {% if customfield.depends_on_option_id and not customfield.parent_selected %}style="display: none"{% endif %}>
-
+        
         {{ form_label('customfield[' ~ customfield['id'] ~ ']', customfield['name']) }}
         <div class="input-container">
             {% if customfield['type'] == 0 %}
@@ -126,7 +126,7 @@
                 {% if customfield['type'] != 9 %}
                     <br />
                 {% endif %}
-                <span class="light">{{ customfield['description'] }}{% if customfield['id'] == 12 %}<a href="https://support2.leeprecision.net/en/knowledgebase/article/privacy-statement" title="Privacy Policy">Privacy Policy</a>{% endif %}{% if customfield['id'] == 11 %}<a href="https://support2.leeprecision.net/en/knowledgebase/article/terms-conditions" title="Terms & Conditions">Terms & Conditions</a>{% endif %}</span>
+                <span class="light">{{ customfield['description'] }}</span>
             {% endif %}
         </div>
     </div>

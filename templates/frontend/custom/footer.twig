@@ -39,7 +39,7 @@
     laroute.set_routes({{ routeCollection|raw }});
     laroute.set_prefix('{{ Config.get('laroute.prefix', '') }}');
 </script>
-
+    
 <!-- Timeago.js -->
 <script src="{{ asset_rev('resources/assets/general/js/main.js') }}"></script>
 
@@ -48,7 +48,7 @@
 {{ block('scripts_footer') }}
 
 {{ View.fireHook('frontend.body_end') }}
-<script type='text/javascript' data-cfasync='false'>window.purechatApi = { l: [], t: [], on: function () { this.l.push(arguments); } };(function () {var done = false;var script = document.createElement('script');script.async = true; script.type = 'text/javascript';script.src = 'https://app.purechat.com/VisitorWidget/WidgetScript';document.getElementsByTagName('HEAD').item(0).appendChild(script);script.onreadystatechange = script.onload = function (e) {if (!done && (!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete')){var w = new PCWidget({c: 'bb418d16-4538-4ca6-a867-8b496ac23ab0', f: true });done = true;}};})();</script>
+
 </body>
 
 </html>

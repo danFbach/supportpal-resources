@@ -4,7 +4,19 @@
 {% block breadcrumb %}{{ parent() }}{{ Lang.get('ticket.open_new') }}{% endblock %}
 {% block content %}
     {{ form_open({ 'route': [ 'ticket.frontend.ticket.storeStep3' ], 'class': 'validate' }) }}
-        {% if not auth_check() %}{{ form_hidden('email', guest_user.email) }}{% endif %}
+        {% if not auth_check() %}
+            {{ form_hidden('email', guest_user.email) }}
+
+            {% if guest_user.firstname is not empty %}
+                {{ form_hidden('firstname', guest_user.firstname) }}
+            {% endif %}
+            {% if guest_user.lastname is not empty %}
+                {{ form_hidden('lastname', guest_user.lastname) }}
+            {% endif %}
+            {% if guest_user.organisation is not empty %}
+                {{ form_hidden('organisation', guest_user.organisation) }}
+            {% endif %}
+        {% endif %}
         <h2>{{ Lang.get('ticket.enter_ticket_details') }}</h2>
         <div>
             <b>Please allow up to 48 hours during the work week for a response.</b><br><br>
@@ -18,7 +30,13 @@
              Hartford, WI 53027<br><br><br>
          </div>
         <div class="form-container first">
-            <div class="form-row">{{ form_label('department', Lang.choice('ticket.department', 1)) }}<div class="input-container">{{ form_hidden('department', department.id) }}<span class="department-name">{{ department.frontend_name }}</span></div></div>
+            <div class="form-row">
+                {{ form_label('department', Lang.choice('ticket.department', 1)) }}
+                <div class="input-container">
+                    {{ form_hidden('department', department.id) }}
+                    <span class="department-name">{{ department.frontend_name }}</span>
+                </div>
+            </div>
             <input type="hidden" name="priority" value="1" />
             {#<div class="form-row">
                 {{ form_label('priority', Lang.choice('ticket.priority', 1)) }}
@@ -27,13 +45,13 @@
                 </div>
             </div>#}
             {% if organisationUsers is not empty %}
-            <div class="form-row">
-                {{ form_label('organisationUsers', Lang.get('user.organisation_users')) }}
-                <div class="input-container">
-                    {{ organisationUsers.implode(', ') }}<br />
-                    <span class="light">{{ Lang.get('user.organisation_users_ticket') }}</span>
+                <div class="form-row">
+                    {{ form_label('organisationUsers', Lang.get('user.organisation_users')) }}
+                    <div class="input-container">
+                        {{ organisationUsers.implode(', ') }}<br />
+                        <span class="light">{{ Lang.get('user.organisation_users_ticket') }}</span>
+                    </div>
                 </div>
-            </div>
             {% endif %}
             {#<div class="form-row">
                 {{ form_label('cc[]', Lang.get('ticket.cc')) }}
@@ -120,9 +138,7 @@
 
         </div>
 
-        {% if Config.get('settings.captcha_type') != 0
-            and (Config.get('channel.web.settings.show_captcha') == 2 or (not auth_check() and Config.get('channel.web.settings.show_captcha') == 1))
-        %}
+        {% if showCaptcha %}
             {{ Captcha.getHtml() }}
         {% endif %}
 
@@ -163,9 +179,7 @@
     <!-- Sort Custom Fields -->
     <script>$(document).ready(function(){ $('div.form-customfields[data-field="8"]').insertBefore($('#subj-container')); });</script>
 
-    {% if Config.get('settings.captcha_type') != 0
-        and (Config.get('channel.web.settings.show_captcha') == 2 or (not auth_check() and Config.get('channel.web.settings.show_captcha') == 1))
-    %}
+    {% if showCaptcha %}
         {{ Captcha.getJs() }}
     {% endif %}
 

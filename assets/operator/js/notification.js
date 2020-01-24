@@ -112,7 +112,9 @@
         SupportPalNotifications.prototype.showBrowserNotification = function (title, text) {
             new PNotify({
                 title: title,
+                title_escape: true,
                 text: text,
+                text_escape: true,
                 addclass: 'stack-bottomright warning',
                 stack: {"dir1": "up", "dir2": "left"},
                 icon: "fa fa-bell",
@@ -137,7 +139,9 @@
 
             var notify = new PNotify({
                 title: title,
+                title_escape: true,
                 text: $('<p>' + text + '</p>').text(),
+                text_escape: true,
                 desktop: {
                     desktop: true,
                     icon: this._notificationIcon,
