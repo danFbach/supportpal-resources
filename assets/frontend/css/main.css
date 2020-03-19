@@ -1882,16 +1882,24 @@ iframe[src="about:blank"] {
 }
 
     .dealer-table img {
-        max-width: 300px;
+        max-width: 350px;
         height: auto;
         margin: 0 auto;
         display: block;
-        max-height: 175px;
+        max-height: 200px;
     }
 
     .dealer-table td {
         width: 50%;
+        padding: 10px 0;
         border: 1px solid #f0f0f0;
+    }
+
+    .dealer-table th {
+        text-align: center;
+        font-size: large;
+        padding: 20px 0;
+        border-bottom: 2px solid #a00;
     }
 /*
     END CUSTOM

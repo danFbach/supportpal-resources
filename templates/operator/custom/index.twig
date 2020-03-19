@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
@@ -55,7 +55,7 @@
     {{ View.fireHook('operator.header_start') }}
 
     {% block header %}
-        <a href="{{ route('core.operator.dashboard') }}" class="logo left">
+        <a href="{{ urldecode(route('ticket.operator.ticket', manageTicketsParams)) }}" class="logo left">
             <img src="{{ get_icon('resources/assets/operator/images/logo_icon.png') }}"
                  alt="{{ Config.get('settings.brand_name') }}" height="32" />
         </a>
