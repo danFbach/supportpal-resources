@@ -17,61 +17,44 @@
     {% endif %}
 
         <h2>{{ Lang.get('user.user_details') }}</h2>
-        <div class="form-container first">
+
+        <div class="sp-form-container">
             {% set profileParameters = {'operator': true, 'managing': true} %}
             {% include 'operator.' ~ template ~ '.user.forms.operator_profile' with profileParameters %}
-
-            {% if record.exists and auth_user().password is not empty %}
-                <div class="form-row">
-                    {{ form_label('twofa_enabled', Lang.get('user.two_fa_enabled')) }}
-                    <div class="input-container">
-                        {% if record.twofa_enabled %}
-                            {{ form_check('twofa_enabled', 1, 1, { 'class': 'toggle', 'id': 'toggle_twofa_enabled' }) }}
-                            <label for="toggle_twofa_enabled"></label>
-                        {% else %}
-                            <span class="twofa-enabled" style="color: #c0392b; font-weight: bold;">
-                                {{ Lang.get('general.no') }}
-                            </span><br />
-                            <span class="description">{{ Lang.get('user.two_fa_personal_settings') }}</span>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endif %}
         </div>
 
         <h2>{{ Lang.get('ticket.settings') }}</h2>
-        <div class="form-container first">
-            <div class="form-row">
+        <div class="sp-form-container">
+            <div class="sp-form-row">
                 {{ form_label('department', Lang.choice('ticket.department', 2)) }}
-                <div class="input-container">
-                    <span class="description">{{ Lang.get('user.op_settings_dept_desc') }}</span>
-                    <br />
-                    <div style="margin-top: 5px;">
+                <div class="sp-input-container sp-input-group">
+                    <div class="sp-description">{{ Lang.get('user.op_settings_dept_desc') }}</div>
+                    <div class="sp-mt-2">
                         {{ Lang.get('user.op_settings_group_dept') }}
                         {{ form_select('group_departments', departments, record.assignedDepartments([]).pluck('id').all(),
                             {'multiple': 'multiple', 'disabled': 'disabled'}) }}
-                        <span class="description">{{ Lang.get('user.op_settings_group_dept_desc') }}</span>
+                        <div class="sp-description">{{ Lang.get('user.op_settings_group_dept_desc') }}</div>
                     </div>
-                    <div style="margin-top: 10px;">
+                    <div class="sp-mt-3">
                         {{ Lang.get('user.op_settings_individual_dept') }}
                         {{ form_select('depts[]', departments, record.departments.pluck('id').all(), {'multiple': 'multiple'}) }}
-                        <span class="description">{{ Lang.get('user.op_settings_individual_dept_desc') }}</span>
+                        <div class="sp-description">{{ Lang.get('user.op_settings_individual_dept_desc') }}</div>
                     </div>
                 </div>
             </div>
 
-            <div class="form-row form-full">
+            <div class="sp-form-row sp-form-full">
                 {{ form_label('ticket_signature', Lang.get('ticket.ticket_signature')) }}
-                <div class="input-container">
+                <div class="sp-input-container">
                     <div style="margin-bottom: 10px;">
-                        {{ form_redactor_mf('ticket_signature', signature) }}
+                        {{ form_redactor_mf('ticket_signature', signature, [], [], false) }}
                     </div>
-                    <span class="description">
+                    <div class="sp-description">
                         {{ Lang.get('user.ticket_signature_desc') }}
                         {% if auth_user().hasPermission('view.operatorsignature') %}
                             {{ Lang.get('user.operator_signature_desc', {'route': route('user.operator.operatorsignature')})|raw }}
                         {% endif %}
-                    </span>
+                    </div>
                 </div>
             </div>
 
@@ -79,11 +62,12 @@
         </div>
 
         <h2>{{ Lang.get('user.notifications') }}</h2>
-        <div class="form-container first">
+
+        <div class="sp-form-container">
             {% include 'operator.' ~ template ~ '.user.forms.operator_notifications' %}
         </div>
 
-        <div class="form-button">
+        <div class="sp-form-button sp-fixed-bottom">
             {{ form_submit(Lang.choice('general.submit', 1)) }}
         </div>
 
@@ -101,25 +85,21 @@
 
     <!-- Redactor -->
     <script src="{{ asset_rev('resources/assets/libs/editor.min.js') }}"></script>
-    <script src="{{ asset_rev('resources/assets/general/js/redactor_config.js') }}"></script>
-
-    <!-- Code Editor -->
-    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/operator/css/codeeditor.css') }}" />
-    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/redactor/codeeditor.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/general/js/editor_config.js') }}"></script>
 
     <!-- Signatures -->
-    <script src="{{ asset_rev('resources/assets/operator/js/redactor/mergefields.js') }}"></script>
     <script type="text/javascript">
         var opts = {
             mergeFields: {
                 tickets: {{ isModuleEnabled('Ticket') ? "true" : "false" }},
                 organisations: '{{ Config.get('settings.organisations_enabled') }}'
             },
-            plugins: ['syntax', 'imagemanager', 'table', 'video', 'fontcolor', 'fontfamily', 'fontsize', 'mergeFields']
+            groups: $R.options.groups.concat(['sp-image']),
+            plugins: ['sp-mergefields'].concat($R.options.plugins)
         };
 
         // Do not initialise redactor on the dummy DOM element.
-        $('textarea[name="ticket_signature"]').redactor($.extend($.Redactor.default_opts, opts));
+        $('textarea[name="ticket_signature"]').redactor(opts);
     </script>
 
     <script type="text/javascript">

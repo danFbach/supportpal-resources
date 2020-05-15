@@ -64,9 +64,6 @@ $(function() {
         addNewItem('.field .field-option-container > .option', $this.find('.field-option-container'));
 
         $this.find('.field-id').val(index);
-
-        // Refresh the sortable option.
-        $(this).find("#sortable").sortable("refresh");
     });
 
     /**
@@ -81,9 +78,6 @@ $(function() {
         if ($this.find('.field-option-container > .option').length === 1) {
             addNewItem('.field .field-option-container > .option', $this.find('.field-option-container'));
         }
-
-        // Refresh the sortable option.
-        $(this).find(".sortable").sortable("refresh");
     });
 
     /**
@@ -94,8 +88,9 @@ $(function() {
     function initSortable($selector)
     {
         return $selector.sortable({
-            placeholder: "ui-state-highlight",
-            handle: ".handle"
+            draggable: '.option',
+            ghostClass: 'sp-opacity-50',
+            handle: '.sp-sortable-handle',
         });
     }
     

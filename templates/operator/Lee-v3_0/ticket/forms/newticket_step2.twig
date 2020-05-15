@@ -1,0 +1,276 @@
+{% extends parent_template %}
+
+{% block title %}
+    {{ Lang.get('ticket.open_new') }}
+{% endblock %}
+
+{% block content %}
+
+    {{ form_open({ 'route': [ 'ticket.operator.ticket.storeStep2' ], 'class': 'validate' }) }}
+
+        <h2>{{ Lang.get('ticket.enter_ticket_details') }}</h2>
+
+        <div class="form-container first">
+
+            {{ form_hidden('user', user.id) }}
+            {{ form_hidden('internal', internal) }}
+            {{ form_hidden('brand', brand.id) }}
+            {% if link_message is not empty %}
+                <input type="hidden" name="link_message" value="{{ link_message }}" />
+            {% endif %}
+            
+            {% if linked_ticket is not empty %}
+                <div class="form-row">
+                    {{ form_label('linked_ticket', Lang.get('ticket.linked_tickets')) }}
+                    <div class="input-container">
+                        <a href="{{ linked_ticket.operator_url }}" target="_blank">#{{ linked_ticket.number }}</a>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if brand_count() > 1 %}
+                <div class="form-row">
+                    {{ form_label('brand', Lang.choice('core.brand', 1)) }}
+                    <div class="input-container">
+                        {{ brand.name }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="form-row">
+                {{ form_label('department', Lang.choice('ticket.department', 1)) }}
+                <div class="input-container">
+                    {{ department.name }}
+                    {{ form_hidden('department', department.id) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                {{ form_label('status', Lang.choice('general.status', 1)) }}
+                <div class="input-container">
+                    {{ form_select('status', statuses, Config.get('settings.default_open_status'), { 'autofocus': 'autofocus'}) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                {{ form_label('priority', Lang.choice('ticket.priority', 1)) }}
+                <div class="input-container">
+                    {{ form_select('priority', priorities) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                {{ form_label('select', Lang.choice('ticket.tag', 2)) }}
+                <div class="input-container">
+                    <select name="tag[]" multiple="multiple">
+                        {% for tag in tags %}
+                            <option value='{{ tag.name }}' data-data='{{ tag|json_encode(constant('JSON_FORCE_OBJECT')) }}'>
+                                {{ tag.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row form-full">
+                {{ form_label('assignedto[]', Lang.get('ticket.assigned_to')) }}
+                <div class="input-container">
+                    <select name="assignedto[]" multiple="multiple">
+                        {% for operator in departmentOperators %}
+                            <option {% if operator.id in department.default_assignedto %}selected="selected"{% endif %}
+                                data-data='{{ operator|json_encode(constant('JSON_FORCE_OBJECT')) }}' value='{{ operator.id }}'>
+                                {{ operator.formatted_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <h2>{{ Lang.get('ticket.enter_subject_message') }}</h2>
+
+        <div class="form-container first">
+
+            <div class="form-row form-full">
+                {{ form_label('subject', Lang.get('ticket.subject')) }}
+                <div class="input-container">
+                    {{ form_text('subject') }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                {{ form_label('text', Lang.choice('general.message', 1)) }}
+                <div class="input-container">
+
+                    <div class="form-row form-full recipients" style="padding: 0;">
+                        <div>
+                            {{ form_label('from', Lang.get('ticket.from')) }}
+                            <div class="input-container" id="fromAddress">
+                                {{ form_select('department_email', fromEmails) }}
+                            </div>
+                        </div>
+                        <div>
+                            {{ form_label('to', Lang.get('ticket.to')) }}
+                            <div class="input-container">
+                                <span id="toAddress">
+                                    {% for user in toEmails %}
+                                        {% set hide = false %}
+                                        {% if internal %}
+                                            {% set classes = "operator operator-" ~ user.id|escape %}
+                                            {% if defaultAssigned is not empty and user.id not in defaultAssigned %}
+                                                {% set hide = true %}
+                                            {% endif %}
+                                        {% endif %}
+
+                                        {# We hide operators that aren't currently emailed, but if they're added to the assigned list then we'll show them #}
+                                        <span class="{{ classes }} {% if hide %}hide{% endif %}">
+                                            {{ user.formatted_name }}
+                                            {% if user.email is not empty %}
+                                                &lt;{{ user.email }}&gt;
+                                            {% endif %}
+                                        </span>
+                                        {% if not loop.last %}<span class="comma">, </span>{% endif %}
+                                    {% endfor %}
+                                </span>
+                                {% if not internal and organisationEmails is empty %}<a class="add-cc right">{{ Lang.get('ticket.add_cc') }}</a>{% endif %}
+                            </div>
+                        </div>
+                        {% if not internal %}
+                            <div class="cc-emails {% if organisationEmails is empty %}hide{% endif %}">
+                                {{ form_label('cc[]', Lang.get('ticket.cc')) }}
+                                <div class="input-container">
+                                    <select name="cc[]" multiple="multiple">
+                                        {% for email in organisationEmails %}
+                                            <option selected="selected" data-data='{{ {'value': email, 'unremovable': true}|json_encode(constant('JSON_FORCE_OBJECT')) }}'
+                                                    value='{{ email }}'>
+                                                {{ email }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row" style="padding: 0;">
+                        {{ form_redactor('text', signature is not empty ? '<br /><br />' ~ signature : null, { 'size': '50x3' }) }}
+                    </div>
+
+                    {% include 'operator.' ~ template ~ '.core.forms.attachments' with {
+                            'route': 'ticket.operator.attachment',
+                            'downloadRoute': 'ticket.operator.attachment.download',
+                            'attachments': [],
+                            'deleteFromServer': link_message|default is not empty ? false : true
+                        }
+                    %}
+
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+
+                    <span class="input-group" style="display: inline-block; font-weight: normal; margin-top: 10px; vertical-align: middle;">
+                        {% if not internal %}
+                            <label>
+                                {{ form_check('send_user_email', 1, operator.default_reply_options['send_email_to_users'],
+                                    department.getUserEmailTemplate('ticket_opened') == -1 ? {'disabled': 'disabled'} : {}) }}
+                                {{ Lang.get('ticket.send_email_to_users') }}
+                            </label>
+                            &nbsp;
+                        {% endif %}
+                        <label>
+                            {{ form_check('send_operators_email', 1, internal ? 1 : department.notify_operators,
+                                (internal and department.getOperatorEmailTemplate('internal_opened') == -1)
+                                    or (not internal and department.getOperatorEmailTemplate('ticket_opened') == -1) ? {'disabled': 'disabled'} : {}) }}
+                            {{ Lang.get('ticket.send_email_to_operators') }}
+                        </label>
+                    </span>
+
+                </div>
+            </div>
+
+            {% include 'operator.' ~ template ~ '.forms.customfields' %}
+
+        </div>
+
+        <div class="form-button">
+            {{ form_submit(Lang.choice('general.submit', 1), { 'id': 'submitNewTicket' }) }}
+        </div>
+
+    {{ form_close() }}
+
+{% endblock %}
+
+{% block scripts_footer %}
+    {% if jsValidator|default is not empty %}
+        {{ jsValidator|raw }}
+    {% endif %}
+
+    <script type="text/javascript">
+        // Routes
+        var embedImageRoute = laroute.route('core.embed.image');
+        
+        // Tag permissions (for newticket.js).
+        var tagPermission = {% if auth_user().hasPermission('create.tickettag') %}1{% else %}0{% endif %};
+
+        // Global variables for redactor plugins
+        var ticketId = null,
+            userId = {{ user.id }},
+            brandId = {{ brand.id }},
+            operatorId = {{ auth_user().id }},
+            internal = {{ internal }},
+            userLanguage = "{{ user.languageOrDefault() }}",
+            allLanguages = {{ languages|sort|json_encode()|raw }};
+    </script>
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/newticket.js') }}"></script>
+    <link href="{{ asset_rev('resources/assets/operator/css/ticket.css') }}" rel="stylesheet" type="text/css" />
+
+    <!-- Selectize -->
+    <script src="{{ asset_rev('resources/assets/operator/js/selectize/disable_delete.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/operator/js/selectize/max_items.js') }}"></script>
+
+    <!-- Redactor -->
+    <script src="{{ asset_rev('resources/assets/libs/editor.min.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/general/js/redactor_config.js') }}"></script>
+
+    <!-- Code Editor -->
+    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/operator/css/codeeditor.css') }}" />
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/redactor/codeeditor.js') }}"></script>
+
+    <!-- Attachments JS -->
+    <script src="{{ asset_rev('resources/assets/general/js/fileupload.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/operator/js/delete.alert.js') }}"></script>
+    <script type="text/javascript">
+        new FileUpload();
+    </script>
+
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/redactor/replyoptions.js') }}"></script>
+    <script type="text/javascript" src="{{ asset_rev('resources/assets/general/js/done_typing.js') }}"></script>
+
+    <script type="text/javascript">
+        // Initialise redactor.
+        var cannedResponsePermission = {% if auth_user().hasPermission('view.cannedresponse') %}1{% else %}0{% endif %};
+
+        var redactor_config = {
+            plugins: [
+                'syntax', 'imagemanager', 'table', 'video', 'fontcolor', 'fontfamily', 'fontsize',
+                {% if isModuleEnabled('Selfservice') %}'ssLink', {% endif %}
+                'cannedResponses',
+            ]
+        };
+
+        $(document).ready(function() {
+            $('textarea[name="text"]').redactor($.extend($.Redactor.default_opts, redactor_config));
+        });
+    </script>
+
+    <!-- Custom fields -->
+    <script src="{{ asset_rev('resources/assets/general/js/customfields.js') }}"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            // Enable hide/show password toggle
+            callHideShowPassword();
+
+            // Date picker
+            callPikaday();
+        });
+    </script>
+{% endblock %}

@@ -82,6 +82,14 @@
             this._notificationIcon = opt_config.hasOwnProperty('icon') ? opt_config['icon'] : null;
             this._timeout = opt_config.hasOwnProperty('timeout') ? opt_config['timeout'] : 15000;
 
+            // Stack for browser notifications.
+            this._stackBottom = {
+                dir1: 'up', dir2: 'left',       // Position from the bottom right corner.
+                firstpos1: 16, firstpos2: 16,   // 16px from the bottom, 16px from the right.
+                spacing1: 16, spacing2: 16,     // 16px from the last one.
+                push: 'top',                    // Put new notifications above old.
+            };
+
             return this;
         };
 
@@ -110,20 +118,24 @@
          * @param text
          */
         SupportPalNotifications.prototype.showBrowserNotification = function (title, text) {
-            new PNotify({
+            PNotify.defaults.icons = 'fontawesome5';
+            PNotify.notice({
                 title: title,
-                title_escape: true,
+                titleTrusted: true,
                 text: text,
-                text_escape: true,
-                addclass: 'stack-bottomright warning',
-                stack: {"dir1": "up", "dir2": "left"},
-                icon: "fa fa-bell",
-                styling: "fontawesome",
-                buttons: {
-                    closer: true,
-                    closer_hover: false,
-                    sticker: false
-                }
+                textTrusted: true,
+                addClass: 'stack-bottomright warning',
+                icon: "fas fa-bell",
+                modules: {
+                    Buttons: {
+                        closerHover: false,
+                        labels: {close: ''},
+                        sticker: false,
+                        stickerHover: false
+                    }
+                },
+                shadow: false,
+                stack: this._stackBottom,
             });
         };
 
@@ -132,36 +144,50 @@
          *
          * @param title
          * @param text
+         * @param route
          */
         SupportPalNotifications.prototype.showDesktopNotification = function (title, text, route) {
             // Request permission for the browser to display notifications (a popup will show up).
-            PNotify.desktop.permission();
+            PNotify.modules.Desktop.permission();
 
-            var notify = new PNotify({
+            PNotify.notice({
                 title: title,
-                title_escape: true,
                 text: $('<p>' + text + '</p>').text(),
-                text_escape: true,
-                desktop: {
-                    desktop: true,
-                    icon: this._notificationIcon,
-                    tag: text
+                modules: {
+                    Desktop: {
+                        desktop: true,
+                        icon: this._notificationIcon,
+                        tag: text,
+                        fallback: false
+                    }
                 }
-            });
+            }).on('click', function(e) {
+                if ($('.ui-pnotify-closer, .ui-pnotify-sticker, .ui-pnotify-closer *, .ui-pnotify-sticker *').is(e.target)) {
+                    return;
+                }
 
-            // Handle click
-            notify.get().on('click', function (e) {
                 // Open the link if one is provided
                 if (typeof route !== 'undefined') {
-                    // Prevent the browser from focusing the Notification's tab
-                    e.preventDefault();
                     window.open(route, '_blank');
                 }
-
-                // Close the notification
-                notify.desktop.close();
             });
         };
+
+        // Show example browser notification
+        $('.preview-browser').on('click', function() {
+            notifications.showBrowserNotification(
+                Lang.get('notification.new_ticket'),
+                Lang.get('notification.new_ticket_text', {'item': '<a href="#">ABC-1234</a>', 'name': 'Joe Bloggs'})
+            );
+        });
+
+        // Show example desktop notification
+        $('.preview-desktop').on('click', function() {
+            notifications.showDesktopNotification(
+                Lang.get('notification.new_ticket'),
+                Lang.get('notification.new_ticket_text', {'item': '<a href="#">ABC-1234</a>', 'name': 'Joe Bloggs'})
+            );
+        });
     }
 
     var init = function (context) {

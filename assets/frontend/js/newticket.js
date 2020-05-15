@@ -1,13 +1,12 @@
-$(document).ready(function() {
-
+$(document).ready(function () {
     // Date picker
-    callPikaday();
+    $('.datepicker').datepicker();
 
     // Enable hide / show password toggle
     callHideShowPassword();
 
     // Redactor
-    $('textarea[name=text]').redactor($.Redactor.default_opts);
+    $('textarea[name="text"]').redactor();
 
     // Regex for email
     var re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
@@ -18,13 +17,15 @@ $(document).ready(function() {
         delimiter: ',',
         persist: false,
         dropdownParent: 'body',
-        createFilter: function(input) {
+        createFilter: function (input) {
             var match = input.match(re);
-            if (match) return !this.options.hasOwnProperty(match[0]);
+            if (match) {
+                return ! this.options.hasOwnProperty(match[0]);
+            }
 
             return false;
         },
-        create: function(input) {
+        create: function (input) {
             if (re.test(input)) {
                 return {
                     value: input,
@@ -43,7 +44,7 @@ $(document).ready(function() {
     var doneTypingInterval = 1000;
 
     // On keyup, start the countdown
-    $('input[name="subject"]').on('keyup', function() {
+    $('input[name="subject"]').on('keyup', function () {
         // Only if self-service module is enabled and setting is on
         if (relatedArticlesEnabled) {
             // Clear any existing timer
@@ -51,7 +52,7 @@ $(document).ready(function() {
             // If there is a subject and it is 3 characters or longer
             if ($(this).val().length > 2) {
                 var subject = $(this).val();
-                typingTimer = setTimeout(function() {
+                typingTimer = setTimeout(function () {
                     fetchArticles(subject);
                 }, doneTypingInterval);
             }
@@ -59,27 +60,27 @@ $(document).ready(function() {
     });
 
     // User has finished typing, fetch related articles
-    function fetchArticles(subject) {
+    function fetchArticles(subject)
+    {
         $.get(
             laroute.route('ticket.frontend.ticket.relatedArticles'),
             {
                 "subject": subject
             },
-            function(response) {
+            function (response) {
                 if (response.status == 'success') {
                     // Show box with view
-                    $('.suggested-articles .articles-list').html(response.data.view);
-                    $('.suggested-articles').show();
+                    $('.sp-suggested-articles .sp-articles-list').html(response.data.view);
+                    $('.sp-suggested-articles').removeClass('sp-hidden');
                 } else {
                     // Hide box
-                    $('.suggested-articles').hide();
+                    $('.sp-suggested-articles').addClass('sp-hidden');
                 }
             },
             'json'
-        ).fail(function() {
+        ).fail(function () {
             // Hide box
-            $('.suggested-articles').hide();
+            $('.sp-suggested-articles').addClass('sp-hidden');
         });
     }
-
 });

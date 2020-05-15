@@ -2,7 +2,7 @@ jQuery(function($){
 
     /**
      * Class name for addNewItem() function.
-     * We specify that we want only children of .customfield-options of class .option, otherwise it matches other
+     * We specify that we want only children of .sp-customfield-options of class .option, otherwise it matches other
      * elements with class .option (for example: selectize).
      *
      * @type {string}
@@ -16,9 +16,6 @@ jQuery(function($){
      */
     $('.add-option').on('click', function() {
         addNewItem(className);
-
-        // Refresh the sortable option.
-        $("#sortable").sortable("refresh");
     });
 
     /**
@@ -31,17 +28,15 @@ jQuery(function($){
         if ($(className).length == 1) {
             addNewItem(className);
         }
-
-        // Refresh the sortable option.
-        $("#sortable").sortable("refresh");
     });
 
     /**
      * Order options.
      */
     $("#sortable").sortable({
-        placeholder: "ui-state-highlight",
-        handle: ".handle"
+        draggable: '.option',
+        ghostClass: 'sp-opacity-50',
+        handle: '.sp-sortable-handle',
     });
 
     /**
@@ -50,22 +45,22 @@ jQuery(function($){
     $('select[name="type"]').on('change', function() {
         // If checklist, multiple options, options or radio
         if ($(this).val() == '2' || $(this).val() == '4' || $(this).val() == '5' || $(this).val() == '7') {
-            $('.customfield-options').show();
+            $('.sp-customfield-options').show();
             if ($(className).length == 1) {
                 addNewItem(className);
             }
         } else {
-            $('.customfield-options').hide();
+            $('.sp-customfield-options').hide();
         }
 
         // Hide encrypt and regex fields if not password, text or textarea
         if ($(this).val() == '6' || $(this).val() == '8' || $(this).val() == '9') {
-            $('.encrypt-field').show();
-            $('.customfield-regex').show();
+            $('.encrypt-field').removeClass('sp-hidden');
+            $('.customfield-regex').removeClass('sp-hidden');
         } else {
             $('.encrypt-field').find('input').prop('checked', false);
-            $('.encrypt-field').hide();
-            $('.customfield-regex').hide();
+            $('.encrypt-field').addClass('sp-hidden');
+            $('.customfield-regex').addClass('sp-hidden');
         }
     });
 

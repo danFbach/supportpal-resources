@@ -93,7 +93,7 @@ var installer = function (parameters) {
                 // Fire the next request after 0.5 seconds
                 if (json.data.complete == true) {
                     $textarea.scrollTop($textarea[0].scrollHeight);
-                    $migration.find('input[type=submit]').show().removeAttr('disabled');
+                    $migration.find('.sp-form-button.sp-hidden').show().find('input[type=submit]').removeAttr('disabled');
 
                     // Remove alert when clicking continue.
                     window.onbeforeunload = null;
@@ -107,7 +107,7 @@ var installer = function (parameters) {
                 errorHandler(jqXHR.responseText);
             })
             .always(function () {
-                $textarea.removeClass('loadinggif');
+                $textarea.parent().removeClass('loadinggif');
             });
     };
 

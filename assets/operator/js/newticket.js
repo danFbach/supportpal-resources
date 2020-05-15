@@ -1,8 +1,7 @@
-$(document).ready(function() {
+$(document).ready(function () {
 
     if ($('.step1').is(':visible')) {
         // STEP 1
-
         var xhr;
 
         // Brand selection.
@@ -57,10 +56,10 @@ $(document).ready(function() {
             create: false,
             placeholder: Lang.get('ticket.select_a_department'),
             render: {
-                item: function(item, escape) {
+                item: function (item, escape) {
                     return '<div class="item">' + item.dashes + escape(item.name) + '</div>';
                 },
-                option: function(item, escape) {
+                option: function (item, escape) {
                     return '<div>' + item.dashes + escape(item.name) + '</div>';
                 }
             },
@@ -86,23 +85,26 @@ $(document).ready(function() {
                 create: false,
                 placeholder: Lang.get('user.search_for_user'),
                 render: {
-                    item: function(item, escape) {
+                    item: function (item, escape) {
                         return '<div class="item">' +
-                            '<img class="avatar" src="' + escape(item.avatar_url) + '" width="16" /> &nbsp;' +
+                            '<img class="sp-avatar sp-max-w-2xs" src="' + escape(item.avatar_url) + '" />&nbsp; ' +
                             escape(item.formatted_name) + (item.organisation ? ' (' + escape(item.organisation || '') + ')' : '') +
-                            (item.email ? ' <span class="description">' + escape('<' + item.email + '>' || '') + '</span>' : '') +
+                            (item.email ? ' <span class="sp-description">' + escape('<' + item.email + '>' || '') + '</span>' : '') +
                             '</div>';
                     },
-                    option: function(item, escape) {
+                    option: function (item, escape) {
                         return '<div>' +
-                            '<img class="avatar" src="' + escape(item.avatar_url) + '" width="16" /> &nbsp;' +
+                            '<img class="sp-avatar sp-max-w-2xs" src="' + escape(item.avatar_url) + '" />&nbsp; ' +
                             escape(item.formatted_name) + (item.organisation ? ' (' + escape(item.organisation || '') + ')' : '') +
-                            (item.email ? '<br /><span class="description">' + escape(item.email || '') + '</span>' : '') +
+                            (item.email ? '<br /><span class="sp-description">' + escape(item.email || '') + '</span>' : '') +
                             '</div>';
                     }
                 },
-                load: function(query, callback) {
-                    if (!query.length) return callback();
+                load: function (query, callback) {
+                    if (! query.length) {
+                        return callback();
+                    }
+
                     $.ajax({
                         url: laroute.route('user.operator.search'),
                         type: 'GET',
@@ -112,10 +114,10 @@ $(document).ready(function() {
                             q: query,
                             operators: 0
                         },
-                        error: function() {
+                        error: function () {
                             callback();
                         },
-                        success: function(res) {
+                        success: function (res) {
                             callback(res.data);
                         }
                     });
@@ -133,8 +135,11 @@ $(document).ready(function() {
             create: true,
             placeholder: Lang.choice('user.organisation', 1),
             allowEmptyOption: true,
-            load: function(query, callback) {
-                if (!query.length) return callback();
+            load: function (query, callback) {
+                if (! query.length) {
+                    return callback();
+                }
+
                 $.ajax({
                     url: laroute.route('user.organisation.search'),
                     type: 'GET',
@@ -143,15 +148,15 @@ $(document).ready(function() {
                         q: query,
                         brand_id: typeof $brand[0] !== "undefined" ? $brand[0].selectize.getValue() : null,
                     },
-                    error: function() {
+                    error: function () {
                         callback();
                     },
-                    success: function(res) {
+                    success: function (res) {
                         callback(res.data);
                     }
                 });
             },
-            onChange: function(value) {
+            onChange: function (value) {
                 // We want to set a separate input if they enter an existing organisation.
                 if (value.length > 0 && value !== this.getOption(value)[0].textContent) {
                     $('input[name="user_organisation_id"]').val(value);
@@ -162,7 +167,7 @@ $(document).ready(function() {
         });
 
         // Handle ticket type switching
-        $('input[name="internal"]').on('change', function() {
+        $('input[name="internal"]').on('change', function () {
             if ($(this).val() == 1) {
                 $('.user-ticket').hide();
                 $('.user-ticket').find(':input:not([name="user_type"])').prop('disabled', true);
@@ -178,7 +183,7 @@ $(document).ready(function() {
         });
 
         // Handle ticket type switching
-        $('input[name="user_type"]').on('change', function() {
+        $('input[name="user_type"]').on('change', function () {
             if ($(this).val() == '0') {
                 $('.existing-user').show();
                 $('.new-user').hide();
@@ -208,20 +213,20 @@ $(document).ready(function() {
             labelField: 'name',
             searchField: 'name',
             create: tagPermission ? true : false,
-            createFilter: function(input) {
+            createFilter: function (input) {
                 return input.length <= 45;
             },
             maxItems: null,
             placeholder: Lang.get("ticket.type_in_tags"),
             render: {
-                item: function(item, escape) {
+                item: function (item, escape) {
                     return '<div class="item" style="background-color: ' + escape(item.colour) + '; color: ' + item.colour_text + '">'
                         + escape(item.name)
                         + '</div>';
                 },
-                option: function(item, escape) {
+                option: function (item, escape) {
                     return '<div>'
-                        + '<span class="statusIcon" style="background-color: ' + escape(item.colour) +'"></span>'
+                        + '<i class="fas fa-circle" style="color: ' + escape(item.colour) + '"></i>'
                         + '&nbsp; ' + escape(item.name)
                         + '</div>';
                 }
@@ -238,42 +243,29 @@ $(document).ready(function() {
             dropdownParent: 'body',
             placeholder: Lang.get('user.select_operators'),
             render: {
-                item: function(item, escape) {
+                item: function (item, escape) {
                     return '<div class="item">'
-                        + '<img class="avatar" src="' + escape(item.avatar_url) + '" width="16" /> &nbsp;'
+                        + '<img class="sp-avatar sp-max-w-3xs" src="' + escape(item.avatar_url) + '" />&nbsp; '
                         + escape(item.formatted_name)
                         + '</div>';
                 },
-                option: function(item, escape) {
+                option: function (item, escape) {
                     return '<div>'
-                        + '<img class="avatar" src="' + escape(item.avatar_url) + '" width="16" /> &nbsp;'
+                        + '<img class="sp-avatar sp-max-w-2xs" src="' + escape(item.avatar_url) + '" />&nbsp; '
                         + escape(item.formatted_name)
                         + '</div>';
                 }
             },
-            onChange: function(value) {
+            onChange: function (value) {
                 if ($.isEmptyObject(value)) {
                     // None assigned, show all
-                    $('#toAddress span').removeClass('hide').show();
+                    $('ul.sp-recipients-list li').removeClass('sp-hidden');
                 } else {
                     // Only show those assigned
-                    $('#toAddress span.operator').addClass('hide');
-                    $.each(value, function(index, value) {
-                        $('#toAddress span.operator-' + value).removeClass('hide');
+                    $('ul.sp-recipients-list li.operator').addClass('sp-hidden');
+                    $.each(value, function (index, value) {
+                        $('ul.sp-recipients-list li.operator-' + value).removeClass('sp-hidden');
                     });
-
-                    // Hide the last visible comma if last operator not visible
-                    $('#toAddress span.operator').each(function (index) {
-                        if ($(this).is(':visible') && $(this).prev().prev().is(':visible')) {
-                            $(this).prev().show();
-                        } else {
-                            $(this).prev().hide();
-                        }
-                    });
-                    if ($('#toAddress span.operator:first').is(':visible')&& $('#toAddress span.operator:not(:first)').is(':visible')) {
-                        // Special case when first item is visible and one after but comma is not showing due to above login
-                        $('#toAddress span.operator:first').next().show();
-                    }
                 }
             }
         });
@@ -289,29 +281,31 @@ $(document).ready(function() {
         var enablePlugins = ['restore_on_backspace', 'remove_button', 'max_items'];
         $('select[name="cc[]"]').selectize($.extend({ }, emailSelectizeConfig(enablePlugins), {
             render: {
-                item: function(item, escape) {
+                item: function (item, escape) {
                     return '<div class="item' + (item.unremovable ? ' unremovable' : '') + '">' + escape(item.value) + '</div>';
                 },
-                option: function(item, escape) {
+                option: function (item, escape) {
                     return '<div>' +
-                        '<img class="avatar" src="' + escape(item.avatar_url) + '" width="16" /> &nbsp;' +
+                        '<img class="sp-avatar sp-max-w-2xs" src="' + escape(item.avatar_url) + '" />&nbsp;' +
                         escape(item.formatted_name) + (item.organisation ? ' (' + escape(item.organisation || '') + ')' : '') +
-                        (item.email ? '<br /><span class="description">' + escape(item.email || '') + '</span>' : '') +
+                        (item.email ? '<br /><span class="sp-description">' + escape(item.email || '') + '</span>' : '') +
                         '</div>';
                 }
             },
-            load: function(query, callback) {
-                if (!query.length) return callback();
+            load: function (query, callback) {
+                if (! query.length) {
+                    return callback();
+                }
 
                 // Search for users
                 $.get(laroute.route('user.operator.search'), { brand_id: brandId, q: query })
-                    .done(function(res) {
+                    .done(function (res) {
                         // Remove user from list if included.
                         res.data = res.data
-                            .filter(function(user) {
+                            .filter(function (user) {
                                 return user.id != userId;
                             })
-                            .map(function(value) {
+                            .map(function (value) {
                                 // Add needed info for search and selected item to work.
                                 value.value = value.email;
                                 value.text = value.firstname + ' ' + value.lastname + ' <' + value.email + '>';
@@ -320,11 +314,13 @@ $(document).ready(function() {
 
                         callback(res.data);
                     })
-                    .fail(function() { callback(); });
+                    .fail(function () {
+                        callback()
+                    });
             },
-            onDelete: function(input) {
+            onDelete: function (input) {
                 var self = this;
-                $.each(input, function(key, value) {
+                $.each(input, function (key, value) {
                     // Delete any items selected that don't have a 'unremovable' class.
                     if (! $('.cc-emails div[data-value="' + value + '"]').hasClass('unremovable')) {
                         self.removeItem(value);
@@ -336,9 +332,9 @@ $(document).ready(function() {
             }
         }));
 
-        // Show CC email input
-        $('.add-cc').on('click', function() {
-            $('.cc-emails').toggle();
+        // Expand recipients list to full form for editing
+        $('.sp-simplified-recipients').on('click', function () {
+            $('.sp-simplified-recipients, .sp-full-recipients').toggleClass('sp-hidden');
         });
 
         // Send email options, uncheck and show tooltip if disabled
@@ -349,5 +345,4 @@ $(document).ready(function() {
             }
         });
     }
-
 });

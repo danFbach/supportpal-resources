@@ -1,11 +1,16 @@
 $(document).ready(function () {
+    // isWindow was deprecated in jQuery 3.3.0
+    function isWindow(obj) {
+        return obj !== null && obj !== undefined && obj === obj.window;
+    }
+
     //
     // jQuery print event callback helpers.
     //   - https://gist.github.com/shaliko/4110822#gistcomment-1543771
     //   - https://www.tjvantoll.com/2012/06/15/detecting-print-requests-with-javascript/
     $.fn.beforeprint = function (callback) {
         return $(this).each(function () {
-            if (! $.isWindow(this)) {
+            if (! isWindow(this)) {
                 return;
             }
             if (this.onbeforeprint !== undefined) {
@@ -17,7 +22,7 @@ $(document).ready(function () {
     };
     $.fn.afterprint = function (callback) {
         return $(this).each(function () {
-            if (! $.isWindow(this)) {
+            if (! isWindow(this)) {
                 return;
             }
             if (this.onafterprint !== undefined) {
@@ -28,38 +33,8 @@ $(document).ready(function () {
         });
     };
 
-    // Preserves the mouse-over on top-level menu elements when hovering over children
-    // Only do this on desktop view
-    $("#nav ul").each(function() {
-        $(this).on('hover', function() {
-            if ($(window).width() > 1080) {
-                $(this).parent().find("a").slice(0,1).addClass("activeParent");
-            }
-        }, function() {
-            if ($(window).width() > 1080) {
-                $(this).parent().find("a").slice(0,1).removeClass("activeParent");
-            }
-        });
-    });
-
-    // Tabs toggling
-    $(document).on('click', 'ul.tabs li', function() {
-        // Get name of tab
-        var name = $(this).attr('id');
-
-        // Hide current div
-        $(this).parent().siblings('div.tabContent').hide();
-        // Show new div
-        $('#tab' + name).show();
-
-        // Remove active from old tab
-        $(this).parent().find('li.active').removeClass('active');
-        // Set to active
-        $(this).addClass('active');
-    });
-
     // Search - Don't submit if it's empty
-    $('form[name=search_header]').on('submit', function(e) {
+    $('form[name=search_form]').on('submit', function(e) {
         if ($(this).find('input[name=query]').val() == '') {
             e.preventDefault();
         }
@@ -69,91 +44,27 @@ $(document).ready(function () {
     $(document).on('click', 'a.check_all, button.check_all', function (e) {
         e.preventDefault();
 
-        $(this).parents('.input-group').find('input[type="checkbox"]').prop('checked', true);
+        $(this).parents('.sp-input-group').find('input[type="checkbox"]').prop('checked', true);
     });
     $(document).on('click', 'a.uncheck_all, button.uncheck_all', function (e) {
         e.preventDefault();
 
-        $(this).parents('.input-group').find('input[type="checkbox"]').prop('checked', false);
+        $(this).parents('.sp-input-group').find('input[type="checkbox"]').prop('checked', false);
     });
 
-    // For opening/collapsing form containers
-    $(document.body).on('click', '.form-container.open .arrow, .form-container.collapsed', function() {
-        if ($(this).hasClass("arrow")) {
-            $this = $(this).parent();
-        } else {
-            $this = $(this);
-        }
-
-        $this.find('.arrow .fa').toggleClass('fa-chevron-down fa-chevron-up');
-        $this.toggleClass('open collapsed');
-        $this.find('.hide').not('.translatable-modal').not('.translatable-modal .hide').toggle();
+    // For opening collapsed form containers
+    $(document.body).on('click', '.sp-form-container.sp-collapsed', function () {
+        $(this).removeClass('sp-collapsed');
+        $(this).find('.sp-hidden').not('.sp-translatable-modal').not('.sp-translatable-modal .sp-hidden').removeClass('sp-hidden');
     });
 
     // Toggle show/hide of the filters area
-    $('.filter-results').on('click', function() {
-        $('.filters').toggle();
-    });
+    $(document.body).on('click', 'button.sp-filter-results', function () {
+        $('div.sp-filter-results').show();
 
-    // Handle anchors on page load
-    if (window.location.hash) {
-        var elem = $('[name="_' + window.location.hash.replace('#', '') + '"]');
-        if (elem.length) {
-            // Scroll to top just in case
-            scroll(0, 0);
-            // Now scroll to anchor
-            $('html, body').animate({
-                scrollTop: elem.offset().top - 25
-            }, 1000);
-        }
-    }
-
-    // Smooth scrolling for anchors
-    $(document.body).on('click', 'a[href^="#"]', function(event) {
-        event.preventDefault();
-
-        // Check if we have a name with an underscore (used in comments)
-        var href = $.attr(this, 'href').substr(1),
-            $elem = $('[name="_' + $.attr(this, 'href').substr(1) + '"]');
-
-        // If not, check if it's an ID first or a name without an underscore
-        // (normal usage)
-        if ($elem.length === 0) {
-            $elem = $('[id="' + $.attr(this, 'href').substr(1) + '"]');
-            if ($elem.length === 0) {
-                $elem = $('[name="' + $.attr(this, 'href').substr(1) + '"]');
-            }
-        }
-
-        // Only handle it if we have an element
-        if (href.length !== 0 && $elem.length !== 0) {
-            $('html, body').animate({
-                scrollTop: $elem.offset().top - 25
-            }, 500);
-        }
-    });
-
-    // Responsive datatables
-    if ($.fn.dataTable !== undefined) {
-        $.extend($.fn.dataTable.defaults, {
-            responsive: true
-        });
-    }
-
-    // Time ago.
-    if (typeof timeAgo !== 'undefined') {
-        timeAgo.render($('time.timeago'));
-    }
-
-    /**
-     * Global AJAX setup handler to add the CSRF token to ALL POST requests.
-     */
-    $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-        if (options.type.toLowerCase() === "post" || options.type.toLowerCase() === "put" ||
-            options.type.toLowerCase() === "delete") {
-            // Add _token entry
-            jqXHR.setRequestHeader('X-CSRF-Token', $('meta[name=csrf_token]').prop('content'));
-        }
+        $('#content').animate({
+            scrollTop: $('div.sp-filter-results').position().top - 24
+        }, 1000);
     });
 
     /**
@@ -173,10 +84,10 @@ $(document).ready(function () {
             if (json.message == Lang.get('messages.session_expired')) {
                 // Show error and scroll to it
                 if (!$('.session-error').is(':visible')) {
-                    $('.desk_content_padding').prepend('<div class="session-error fail box">' +
+                    $('.sp-content-inner').prepend('<div class="session-error sp-alert sp-alert-error">' +
                         Lang.get("messages.session_refresh") + '</div>');
                 }
-                $('html, body').animate({ scrollTop: 0 }, 1000);
+                $('#content').animate({ scrollTop: 0 }, 1000);
                 return false;
             }
         }
@@ -184,30 +95,20 @@ $(document).ready(function () {
 
     // Scrolling for sidebar on desktop
     var $sidebar = $('#sidebar');
-    var isMobile = function () {
-        return $(window).width() < 1080 || $(window).height() < 720;
-    };
-    if (typeof $.fn.overlayScrollbars !== 'undefined' && $sidebar.length && ! isMobile()) {
+    if (typeof $.fn.overlayScrollbars !== 'undefined' && $sidebar.length) {
         /**
          * Initialise overlay scrollbars on the element.
          *
          * @param $elem
          * @returns {jQuery|*}
          */
-        var initOverlayScrollars = function ($elem) {
+        var initOverlayScrollbars = function ($elem) {
             return $elem.overlayScrollbars({
                 overflowBehavior: {
                     x: 'hidden'
                 },
                 scrollbars: {
                     autoHide: 'scroll'
-                },
-                callbacks: {
-                    onUpdated: function (e) {
-                        if (isMobile()) {
-                            this.destroy();
-                        }
-                    }
                 }
             });
         };
@@ -222,11 +123,11 @@ $(document).ready(function () {
         };
 
         // Initialise overlay scrollbars on the sidebar.
-        initOverlayScrollars($sidebar);
+        initOverlayScrollbars($sidebar);
 
         // Destroy and reinitialise overlay scrollbars on print event otherwise overflow content is hidden.
         $(window).beforeprint(destroyOverlayScrollbars)
-            .afterprint(initOverlayScrollars.bind(null, $sidebar));
+            .afterprint(initOverlayScrollbars.bind(null, $sidebar));
     }
 
 });
@@ -282,7 +183,7 @@ function addNewItem(className, container) {
     }
 
     // Make it visible
-    newElem.show();
+    newElem.removeClass('sp-hidden');
 
     // Auto select first option of dropdowns - fix for firefox
     newElem.find('select').each(function () {
@@ -290,21 +191,6 @@ function addNewItem(className, container) {
     });
 
     return index;
-}
-
-// Adds a button to show/hide passwords
-function callHideShowPassword() {
-    $('input[type=password]').hideShowPassword(false, true, {
-        states: {
-            shown: { toggle: { attr: { title: '' } } },
-            hidden: { toggle: { attr: { title: '' } } }
-        }
-    });
-}
-
-// Date picker fields
-function callPikaday() {
-    $('.datepicker').pikaday({ format: $('meta[name=date_format]').prop('content') });
 }
 
 function array_map (callback) { // eslint-disable-line camelcase

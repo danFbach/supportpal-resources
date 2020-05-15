@@ -1,19 +1,22 @@
-$(document).ready(function() {
+$(document).ready(function () {
     var queryTimer;
 
     /**
      * Reload datables on changing filter
      */
-    $('.filters :input').on('change input', function(event) {
+    $('.sp-filter-results :input').on('change input', function (event) {
         // Ignore if losing focus on text input
-        if ($(this).is('input:text:not(.datepicker)') && event.type == 'change') { return; }
+        if ($(this).is('input:text:not(.datepicker)') && event.type == 'change') {
+            return;
+        }
+
         // Delay query by 500ms so we don't run it on every keystroke
         clearTimeout(queryTimer);
         queryTimer = setTimeout(function () {
             // Reload table
             $('.dataTable').on('preXhr.dt', function (e, settings, data) {
                 // Add conditions to parameters
-                var conditions = $(".filters :input").serializeArray();
+                var conditions = $(".sp-filter-results :input").serializeArray();
                 $.each(conditions, function (index, value) {
                     if (value.value != '' && value.value != '-1') {
                         data[value.name] = value.value;
@@ -26,7 +29,7 @@ $(document).ready(function() {
     /**
      * Reset filter
      */
-    $('.reset-filter').on('click', function(event) {
+    $('.reset-filter').on('click', function () {
         // Get param and reset
         var $input = $(this).prev();
         if ($input.is('input:text')) {
@@ -39,10 +42,5 @@ $(document).ready(function() {
         $input.trigger('input');
     });
 
-    $('.datepicker').pikaday({
-        format: $('meta[name=date_format]').prop('content'),
-        onSelect: function() {
-            $('.datepicker:first').trigger('change');
-        }
-    });
+    $('.datepicker').datepicker();
 });

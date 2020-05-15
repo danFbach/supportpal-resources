@@ -5,6 +5,24 @@
     {{ Lang.get('general.home') }}
 {% endblock %}
 
+{% block precontent %}
+    {% if isModuleEnabled('Selfservice') %}
+        <div class="sp-search-container sp-sticky sp-px-6 sp-bg-primary sp-shadow print:sp-hidden">
+            <div class="sp-container sp-pb-3 sp-m-auto sm:sp-pb-6 lg:sp-pt-3 lg:sp-pb-12">
+                <div class="sp-search sp-w-full sp-mx-auto sp-text-center sm:sp-w-3/4 lg:sp-w-2/3">
+                    <div class="sp-mb-3/2 sp-font-semibold sp-text-lg xs:sp-text-xl sm:sp-mb-3 sm:sp-text-2xl lg:sp-text-3xl">
+                        {{ Lang.get('core.how_can_we_help') }}
+                    </div>
+                    <form name="search" action="{{ route('core.frontend.search') }}" method="post">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+                        <input type="search" name="query" placeholder="{{ Lang.get('general.search') }}" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 
     {% if not isModuleEnabled('Ticket') and not isModuleEnabled('Selfservice') %}
@@ -14,88 +32,102 @@
     {% else %}
 
         {% if isModuleEnabled('Ticket') %}
-            <div class="desk_section">
-                <a href="{{ route('ticket.frontend.ticket.createStep1') }}">
-                    <img src="{{ asset_rev('resources/assets/frontend/icons/submit.png') }}" class="icon left"
-                         width="48" alt="{{ Lang.get('core.submit_ticket') }}" />
+            <div class="sp-flex sp-flex-wrap sp--m-3 lg:sp-flex-no-wrap
+                        {% if isModuleEnabled('Selfservice') and not types.isEmpty() %}sp-mb-6{% endif %}">
+                <a href="{{ route('ticket.frontend.ticket.createStep1') }}"
+                   class="sp-w-full sp-px-6 sp-py-3 sp-m-3 sp-bg-secondary sp-rounded sp-shadow lg:sp-w-1/2">
+                    <div class="sp-dashboard-section sp-flex sp-items-center">
+                        <div class="sp-icon sp-flex-none sp-mr-6">
+                            <i class="fas fa-fw fa-envelope-open-text sp-text-5xl" alt="{{ Lang.get('core.submit_ticket') }}"></i>
+                        </div>
+                        <div class="sp-flex-grow sp-py-1">
+                            <h4 class="sp-text-xl">{{ Lang.get('core.submit_ticket') }}</h4>
+                            <p class="sp-m-0 sp-text-secondary">{{ Lang.get('core.submit_ticket_desc') }}</p>
+                        </div>
+                    </div>
                 </a>
-                <h4><a href="{{ route('ticket.frontend.ticket.createStep1') }}">{{ Lang.get('core.submit_ticket') }}</a></h4>
-                <p>{{ Lang.get('core.submit_ticket_desc') }}</p>
+                {% if not auth_check() and Config.get('channel.web.settings.unauthenticated_users') %}
+                    <a href="{{ route('ticket.frontend.track') }}"
+                       class="sp-w-full sp-px-6 sp-py-3 sp-m-3 sp-bg-secondary sp-rounded sp-shadow lg:sp-w-1/2">
+                        <div class="sp-dashboard-section sp-flex sp-items-center">
+                            <div class="sp-icon sp-flex-none sp-mr-6">
+                                <i class="fas fa-fw fa-binoculars sp-text-5xl" alt="{{ Lang.get('core.track_ticket') }}"></i>
+                            </div>
+                            <div class="sp-flex-grow sp-py-1">
+                                <h4 class="sp-text-xl">{{ Lang.get('core.track_ticket') }}</h4>
+                                <p class="sp-m-0 sp-text-secondary">{{ Lang.get('core.track_ticket_desc') }}</p>
+                            </div>
+                        </div>
+                    </a>
+                {% elseif auth_check() %}
+                    <a href="{{ route('ticket.frontend.ticket.index') }}"
+                       class="sp-w-full sp-px-6 sp-py-3 sp-m-3 sp-bg-secondary sp-rounded sp-shadow lg:sp-w-1/2">
+                        <div class="sp-dashboard-section sp-flex sp-items-center">
+                            <div class="sp-icon sp-flex-none sp-mr-6">
+                                <i class="fas fa-fw fa-binoculars sp-text-5xl" alt="{{ Lang.get('core.track_ticket') }}"></i>
+                            </div>
+                            <div class="sp-flex-grow sp-py-1">
+                                <h4 class="sp-text-xl">{{ Lang.get('core.my_tickets') }}</h4>
+                                <p class="sp-m-0 sp-text-secondary">{{ Lang.get('core.my_tickets_desc') }}</p>
+                            </div>
+                        </div>
+                    </a>
+                {% endif %}
             </div>
-
-            {% if not auth_check() and Config.get('channel.web.settings.unauthenticated_users') %}
-            <div class="desk_section">
-                <a href="{{ route('ticket.frontend.track') }}">
-                    <img src="{{ asset_rev('resources/assets/frontend/icons/binoculars.png') }}" class="icon left"
-                         width="48" alt="{{ Lang.get('core.track_ticket') }}" />
-                </a>
-                <h4><a href="{{ route('ticket.frontend.track') }}">{{ Lang.get('core.track_ticket') }}</a></h4>
-                <p>{{ Lang.get('core.track_ticket_desc') }}</p>
-            </div>
-            {% elseif auth_check() %}
-            <div class="desk_section">
-                <a href="{{ route('ticket.frontend.ticket.index') }}">
-                    <img src="{{ asset_rev('resources/assets/frontend/icons/binoculars.png') }}" class="icon left"
-                         width="48" alt="{{ Lang.get('core.my_tickets') }}" />
-                </a>
-                <h4><a href="{{ route('ticket.frontend.ticket.index') }}">{{ Lang.get('core.my_tickets') }}</a></h4>
-                <p>{{ Lang.get('core.my_tickets_desc') }}</p>
-            </div>
-            {% endif %}
         {% endif %}
 
         {% if isModuleEnabled('Selfservice') %}
-            {% for type in selfserviceTypes %}
-            <div class="desk_section">
-                <a href="{{ type.url }}">
-                    <img src="data:image/jpeg;base64, {{ type.icon }}" class="icon left"
-                         width="48" alt="{{ type.name }}" />
-                </a>
-                <h4><a href="{{ type.url }}">{{ type.name }}</a></h4>
-                <p>{{ type.description }}</p>
-            </div>
+            {% for type in types %}
+                {% set isCollapsible = not type.articles.isEmpty() and type.content == 0 and type.show_on_dashboard %}
+
+                <div class="sp-dashboard-section" id="sp-selfservice-{{ type.id }}">
+                    <div class="{% if isCollapsible %}sp-collapsible{% endif %}">
+                        <div class="sp-flex sp-items-center">
+                            <div class="sp-icon sp-flex-none sp-mr-6">
+                                <a href="{{ type.url }}">
+                                    <i class="fas fa-fw {{ type.icon }} sp-text-5xl" alt="{{ type.name }}"></i>
+                                </a>
+                            </div>
+                            <div class="sp-flex-grow sp-py-1">
+                                <h4 class="sp-text-xl"><a href="{{ type.url }}">{{ type.name }}</a></h4>
+                                <p class="sp-m-0">{{ type.description }}</p>
+                            </div>
+                        </div>
+
+                        {% if isCollapsible %}
+                            <span class="sp-ml-auto">
+                                <i class="fas fa-chevron-up"></i>
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% if isCollapsible %}
+                        <div class="sp-hidden sp-mt-6">
+                            {% include 'frontend.' ~ template ~ '.selfservice.article_list' with {'articles': type.articles, 'noRssFeed': true} %}
+
+                            <div class="sp-mt-6">
+                                <a href="{{ type.url }}" class="sp-button sp-button-sm">{{ Lang.get('general.view_all') }} &raquo;</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
             {% endfor %}
         {% endif %}
-
     {% endif %}
 
     {{ View.fireHook('frontend.dashboard') }}
 
-    {% if isModuleEnabled('Selfservice') %}
+{% endblock %}
 
-        {% if types.contains('show_on_dashboard', 1) %}
+{% block scripts_footer %}
+    <script type="text/javascript">
+        $(function () {
+            // Set a top on the search container so the header has a shadow on scrolling.
+            $('.sp-search-container').css('top', $('header').height() - $('.sp-search-container').height());
 
-            <ul class="desk-tabs">
-                {% for type in types %}
-                    {% if type.content == 0 and type.show_on_dashboard %}
-                        <li id="{{ type.slug }}" {% if firstTab is not defined %} class="active" {% set firstTab = true %} {% endif %}>
-                            {% if type.view == 0 %}
-                                {{ Lang.get('selfservice.type_popular_items', {'type': type.name}) }}
-                            {% else %}
-                                {{ Lang.get('selfservice.type_latest_items', {'type': type.name}) }}
-                            {% endif %}
-                        </li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-
-            <div class="desk-tabs-content">
-                {% for type in types %}
-                    {% if type.content == 0 and type.show_on_dashboard %}
-                        <div id="tab{{ type.slug }}" class="desk-tab {% if firstContent is defined %} hide {% else %} {% set firstContent = true %} {% endif %}">
-                            {% if type.view == 0 %}
-                                <h2 class="tab-title">{{ Lang.get('selfservice.type_popular_items', {'type': type.name}) }}</h2>
-                            {% else %}
-                                <h2 class="tab-title">{{ Lang.get('selfservice.type_latest_items', {'type': type.name}) }}</h2>
-                            {% endif %}
-                            {% include 'frontend.' ~ template ~ '.selfservice.article_list' with {'articles': type.articles, 'noRssFeed': true} %}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-        {% endif %}
-
-    {% endif %}
-
+            // Allow clicking on the type name, without toggling the section content.
+            $('.sp-dashboard-section a').on('click', function (e) {
+                e.stopPropagation();
+            });
+        });
+    </script>
 {% endblock %}

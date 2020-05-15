@@ -1,7 +1,8 @@
-$(document).ready(function() {
+$(document).ready(function () {
     customfieldRedactor();
 
-    $('.redactor-editor[contenteditable="false"] a').on('click', function() {
+    // Open links in locked custom fields in new tab.
+    $('.redactor-read-only a').on('click', function () {
         this.target = "_blank";
     });
 
@@ -16,7 +17,7 @@ $(document).ready(function() {
         if (selected.length) {
             // Show the field that depends on the selected option.
             var $element = $('[data-depends-on-option="' + selected + '"]');
-            $element.show();
+            $element.removeClass('sp-hidden');
             resetForm($element, $element.data('locked') === 1);
 
             // Check whether the field has a value selected, if so we can want to show any dependent fields.
@@ -26,13 +27,13 @@ $(document).ready(function() {
             }
         }
     };
-    $(document).on('change', '.form-customfields select:not([multiple])', function () {
+    $(document).on('change', '.sp-form-customfields select:not([multiple])', function () {
         // Hide all dependent fields.
-        var children = $(this).parents('.form-customfields').data('dependent-children');
-        if (typeof children === 'object' && children.length > 0) {
+        var children = $(this).parents('.sp-form-customfields').data('dependent-children');
+        if (children && children.length > 0) {
             $.each(children, function (index, value) {
                 var $element = $('[data-field="' + value + '"]');
-                $element.hide();
+                $element.addClass('sp-hidden');
                 resetForm($element, true);
             });
         }
@@ -43,25 +44,32 @@ $(document).ready(function() {
     });
 });
 
-function customfieldRedactor() {
-    $.each($('.form-customfields textarea'), function () {
-        // Don't show link tootlip if redactor is disabled
-        var linkTooltip = true;
-        if ($(this).prop('disabled')) {
-            linkTooltip = false;
-        }
+function customfieldRedactor()
+{
+    $.each($('.sp-form-customfields textarea'), function () {
+        // Don't show link tootlip if redactor is disabled/readonly
+        var linkTooltip = $(this).prop('disabled') || $(this).prop('readonly') ? false : true;
 
         $(this).redactor({
-            linebreaks: true,
-            linkSize: 255,
-            linkTooltip: linkTooltip,
+            // Height settings.
+            minHeight: false,
+
+            // Paste settings.
+            pasteImages: false,
+            pasteBlockTags: ['p'],
+            pasteInlineTags: ['a', 'br'],
+
+            // Toolbar settings.
             toolbar: false,
-            allowedTags: ['a','br']
+            toolbarContext: linkTooltip,
+
+            // Shortcut settings.
+            shortcuts: false,
         });
 
         // Handle locked textareas
-        if ($(this).prop('disabled')) {
-            $(this).redactor('core.getEditor').attr('contenteditable', 'false');
+        if ($(this).prop('disabled') || $(this).prop('readonly')) {
+            $(this).redactor('enableReadOnly');
         }
     });
 }

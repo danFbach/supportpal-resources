@@ -1,22 +1,20 @@
-var redactor;
-
 $(document).ready(function() {
     // Date picker
-    callPikaday();
+    $('.datepicker').datepicker();
 
     // Enable hide / show password toggle
     callHideShowPassword();
 
     // Load attachment previews
-    loadAttachmentPreviews($('.message'));
+    App.attachments.loadPreviews($('.sp-message'));
 
     // Ajax load messages.
-    $(document).on('click', '.show_message', function (e) {
+    $(document).on('click', '.sp-message-text-show-more', function (e) {
         e.preventDefault();
         e.stopPropagation();
 
         var $this = $(this),
-            $message = $(this).parents('.message'),
+            $message = $(this).parents('.sp-message'),
             token = $('meta[name="token"]').prop('content'),
             route = laroute.route('ticket.frontend.message.showJson', { id: $message.data('id') });
         if (token.length !== 0) {
@@ -25,31 +23,32 @@ $(document).ready(function() {
 
         // Remove the show more link and replace it by a loading icon.
         $(this).hide();
-        $message.find('.text').append(
-            '<span class="loading-text description">'
-                + '<i class="fa fa-spinner fa-pulse fa-fw"></i> ' + Lang.get('general.loading') + '...'
+        $message.find('.sp-message-text').append(
+            '<span class="sp-loading sp-description">'
+            + '<i class="fas fa-spinner fa-pulse"></i>&nbsp; ' + Lang.get('general.loading') + '...'
             + '</span>'
         );
 
         $.get(route)
             .done(function (ajax) {
                 // Load the message in, it should already be sanitized.
-                $message.find('.text').html(ajax.data.purified_text);
+                $message.find('.sp-message-text').html(ajax.data.purified_text);
             })
             .fail(function () {
-                swal(Lang.get('messages.error'), Lang.get('messages.error_loading_message'), 'error');
+                Swal.fire(Lang.get('messages.error'), Lang.get('messages.error_loading_message'), 'error');
                 $this.show();
-                $message.find('.loading-text').remove();
+                $message.find('.sp-loading').remove();
             });
     });
 
-    // Open links in a new window/tab
-    $(document).on('click', '.message .text a', function() {
-        $(this).attr('target', '_blank');
+    // Open links in a new window/tab. Needs rel="noopener" due to
+    // https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+    $(document).on('click', '.sp-message-text a', function () {
+        $(this).attr('target', '_blank').attr('rel', 'noopener');
     });
 
     // Redactor
-    redactor = $('textarea[name=text]').redactor($.Redactor.default_opts);
+    var instance = $('textarea[name=text]').redactor();
 
     // Regex for email
     var re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
@@ -68,17 +67,19 @@ $(document).ready(function() {
         dropdownParent: 'body',
         placeholder: Lang.get('ticket.enter_email_address'),
         render: {
-            item: function(item, escape) {
+            item: function (item, escape) {
                 return '<div class="item' + (item.unremovable ? ' unremovable' : '') + '">' + escape(item.value) + '</div>';
             }
         },
-        createFilter: function(input) {
+        createFilter: function (input) {
             var match = input.match(re);
-            if (match) return !this.options.hasOwnProperty(match[0]);
+            if (match) {
+                return ! this.options.hasOwnProperty(match[0]);
+            }
 
             return false;
         },
-        create: function(input) {
+        create: function (input) {
             if (re.test(input)) {
                 return {
                     value: input,
@@ -88,9 +89,9 @@ $(document).ready(function() {
 
             return false;
         },
-        onDelete: function(input) {
+        onDelete: function (input) {
             var self = this;
-            $.each(input, function(key, value) {
+            $.each(input, function (key, value) {
                 // Delete any items selected that don't have a 'unremovable' class.
                 if (! $('.cc-emails div[data-value="' + value + '"]').hasClass('unremovable')) {
                     self.removeItem(value);
@@ -102,22 +103,21 @@ $(document).ready(function() {
         }
     });
 
-    // Show CC email input
-    $('.toggle-cc').on('click', function() {
-        $('.recipients').show();
-        $(this).hide();
+    // Expand recipients list to full form for editing
+    $('.sp-recipients-text').on('click', function () {
+        $('.sp-recipients-text, .sp-recipients-input').toggleClass('sp-hidden');
     });
 
     // Backwards compatibility for JS changes in 2.1.2 (DEV-1032), this means the reply form continues to work.
-    $('.message-form').data('ajax', 'ajax');
+    $('.sp-message-form').data('ajax', 'ajax');
 
     // Add Reply.
-    $('.message-form').on('form:submit', function() {
+    $('.sp-message-form').on('form:submit', function () {
         saveMessage($(this));
     });
 
     // Update ticket custom fields
-    $('.save-fields').on('click', function() {
+    $('.sp-customfields-save').on('click', function () {
         // Make sure data is valid before submitting
         if ($(this).parents('form').valid()) {
             // Get form data
@@ -128,218 +128,175 @@ $(document).ready(function() {
 
             // Post updated data
             $.ajax({
-                url: laroute.route('ticket.frontend.ticket.saveFields', { 'number': $('input[name=ticket_number]').val() }),
+                url: laroute.route('ticket.frontend.ticket.saveFields', {'number': $('input[name=ticket_number]').val()}),
                 type: 'POST',
                 data: data,
                 dataType: 'json'
-            }).done(function(response) {
+            }).done(function (response) {
                 if (response.status == 'success') {
-                    $('.ticket-update.success').show(500).delay(5000).hide(500);
+                    $('.sp-ticket-update.sp-alert-success').show(500).delay(5000).hide(500);
                 } else {
-                    $('.ticket-update.fail').show(500).delay(5000).hide(500);
+                    $('.sp-ticket-update.sp-alert-error').show(500).delay(5000).hide(500);
                 }
-            }).fail(function() {
-                $('.ticket-update.fail').show(500).delay(5000).hide(500);
+            }).fail(function () {
+                $('.sp-ticket-update.sp-alert-error').show(500).delay(5000).hide(500);
             });
         }
     });
 
     // Start polling for new replies
     pollReplies();
-});
 
-/*
- * Posts message to ticket
- */
-function saveMessage(form) {
-    // Make sure there is a message there
-    form.find('textarea[name="text"]').valid();
+    /*
+     * Posts message to ticket
+     */
+    function saveMessage(form)
+    {
+        // Make sure there is a message there
+        form.find('textarea[name="text"]').valid();
 
-    // Save data here before disabling fields
-    var data = form.serializeArray();
+        // Save data here before disabling fields
+        var data = form.serializeArray();
 
-    // Disable form and submit button
-    form.find('textarea[name="text"]').prop('disabled', true);
-    form.find('input[type="submit"]').prop('disabled', true);
+        // Disable form and submit button
+        form.find('textarea[name="text"]').prop('disabled', true);
+        form.find('input[type="submit"]').prop('disabled', true);
 
-    // Post updated data
-    $.ajax({
-        url: laroute.route('ticket.frontend.message.store'),
-        type: 'POST',
-        data: data,
-        dataType: 'json'
-    }).done(function(response) {
-        if (response.status == 'success') {
-            $('.ticket-reply.success').show(500).delay(5000).hide(500);
+        // Post updated data
+        $.ajax({
+            url: laroute.route('ticket.frontend.message.store'),
+            type: 'POST',
+            data: data,
+            dataType: 'json'
+        }).done(function (response) {
+            if (response.status == 'success') {
+                $('.sp-ticket-reply.sp-alert-success').show(500).delay(5000).hide(500);
 
-            // Show new message
-            showMessage(response.data.view);
+                // Show new message
+                showMessage(response.data.view);
 
-            // Reset the form
-            form.find('textarea[name="text"]').val('').prop('disabled', false);
-            redactor.redactor('code.set', '');
-            $('.attached-files').find('li:not(:first)').remove();
-            $('.attachment-details').find('input[type=hidden][name^="attachment["]:not(:first)').remove();
+                // Reset the form
+                form.find('textarea[name="text"]').val('').prop('disabled', false);
+                instance.source.setCode('');
+                $('.sp-attached-files').find('li:not(:first)').remove();
+                $('.sp-attachment-details').find('input[type=hidden][name^="attachment["]:not(:first)').remove();
 
-            // Update status
-            $('.ticket-status').text(response.data.status_name);
-            $('.ticket-status').css("background-color", response.data.status_colour);
-        } else {
-            if (typeof response.message != 'undefined' && response.message != '') {
-                // Custom message
-                $('.ticket-custom.fail').text(response.message).show(500).delay(5000).hide(500);
+                // Update status
+                $('.sp-ticket-status').text(response.data.status_name);
+                $('.sp-ticket-status').css("background-color", response.data.status_colour);
             } else {
-                $('.ticket-reply.fail').show(500).delay(5000).hide(500);
+                if (typeof response.message != 'undefined' && response.message != '') {
+                    // Custom message
+                    $('.sp-ticket-custom.sp-alert-error .sp-container').text(response.message).show(500).delay(5000).hide(500);
+                } else {
+                    $('.sp-ticket-reply.sp-alert-error').show(500).delay(5000).hide(500);
+                }
+                // Re-enable textarea
+                form.find('textarea[name="text"]').prop('disabled', false);
             }
+        }).fail(function () {
+            // Show error
+            $('.sp-ticket-reply.sp-alert-error').show(500).delay(5000).hide(500);
+
             // Re-enable textarea
             form.find('textarea[name="text"]').prop('disabled', false);
-        }
-    }).fail(function() {
-        // Show error
-        $('.ticket-reply.fail').show(500).delay(5000).hide(500);
-        // Re-enable textarea
-        form.find('textarea[name="text"]').prop('disabled', false);
-    }).always(function() {
-        // Reset form
-        form.find('input[type="submit"]').prop('disabled', false);
-    });
-}
-
-var lastReplyPoll;
-
-/*
- * Poll for new replies
- */
-function pollReplies() {
-    $.ajax({
-        url: laroute.route('ticket.frontend.message.poll'),
-        data: {
-            ticket_number: ticketNumber,
-            token: $('meta[name="token"]').prop('content'),
-            lastPoll: lastReplyPoll,
-        },
-        success: function (response) {
-            // If there are notifications, show them
-            if (typeof response.data != 'undefined') {
-                if (response.data.messages.length) {
-                    // Add each message
-                    $.each(response.data.messages, function (index, value) {
-                        showMessage(value);
-                    });
-                }
-
-                // Update ticket details
-                if (response.data.details.update) {
-                    // Update sidebar items
-                    $('.ticket-department').text(response.data.details.department);
-                    $('.ticket-status').text(response.data.details.status);
-                    $('.ticket-status').css('background-color', response.data.details.status_colour);
-                    $('.ticket-priority').text(response.data.details.priority);
-                    $('.ticket-priority').css('background-color', response.data.details.priority_colour);
-                    $('.ticket-updated').html(response.data.details.updated_at);
-
-                    // If closed, hide mark as resolved button
-                    if (response.data.details.status_id == closedStatusId) {
-                        $('.mark-resolved').hide();
-                    } else {
-                        $('.mark-resolved').show();
-                    }
-
-                    // If changed to locked or unlocked, refresh page
-                    if (response.data.details.locked) {
-                        if ($('.add-reply').length) {
-                            location.reload();
-                        }
-                    } else {
-                        if ($('.ticket-locked').length) {
-                            location.reload();
-                        }
-                    }
-                }
-
-                // Refresh timeago.
-                if (typeof timeAgo !== 'undefined') {
-                    timeAgo.render($('time.timeago'));
-                }
-            }
-
-            // Update the last poll time
-            lastReplyPoll = response.timestamp;
-        },
-        dataType: "json",
-        complete: function () {
-            // Delay the next poll by 15 seconds
-            pollTimeout = setTimeout(function () {
-                pollReplies();
-            }, 15000);
-        }
-    });
-}
-
-/*
- * Displays message and highlights it temporarily
- */
-function showMessage(message) {
-    // Show new message
-    if (descReplyOrder) {
-        message = $(message).prependTo($('.message-block'));
-    } else {
-        message = $(message).insertAfter($('.message').last());
+        }).always(function () {
+            // Reset form
+            form.find('input[type="submit"]').prop('disabled', false);
+        });
     }
 
-    // Load attachment previews if needed
-    loadAttachmentPreviews(message);
+    var lastReplyPoll;
 
-    // Special effects
-    message.css('border-left','3px solid #a4d0e9');
-    setTimeout(function(){ message.css('border-left','0'); }, 10000);
-    message.css('background','#e5f1f9');
-    setTimeout(function(){ message.css('background',''); }, 10000);
-}
+    /*
+     * Poll for new replies
+     */
+    function pollReplies()
+    {
+        $.ajax({
+            url: laroute.route('ticket.frontend.message.poll'),
+            data: {
+                ticket_number: ticketNumber,
+                token: $('meta[name="token"]').prop('content'),
+                lastPoll: lastReplyPoll,
+            },
+            success: function (response) {
+                // If there are notifications, show them
+                if (typeof response.data != 'undefined') {
+                    if (response.data.messages.length) {
+                        // Add each message
+                        $.each(response.data.messages, function (index, value) {
+                            showMessage(value);
+                        });
+                    }
 
+                    // Update ticket details
+                    if (response.data.details.update) {
+                        // Update sidebar items
+                        $('.sp-ticket-department').text(response.data.details.department);
+                        $('.sp-ticket-status').text(response.data.details.status);
+                        $('.sp-ticket-status').css('background-color', response.data.details.status_colour);
+                        $('.sp-ticket-priority').text(response.data.details.priority);
+                        $('.sp-ticket-priority').css('background-color', response.data.details.priority_colour);
+                        $('.sp-ticket-updated').html(response.data.details.updated_at);
 
-/**
- * Load attachment previews within message div if needed.
- *
- * @param $message
- */
-function loadAttachmentPreviews(message) {
-    // Preview certain attachments
-    $(message).find(".attachments").lightGallery({
-        selector: '.attachment-preview',
-        counter: false
-    });
+                        // If closed, hide mark as resolved button
+                        if (response.data.details.status_id == closedStatusId) {
+                            $('.sp-mark-resolved').hide();
+                        } else {
+                            $('.sp-mark-resolved').show();
+                        }
 
-    // Load preview image if it exists
-    $(message).find('span[data-preview-url]').each(function(index) {
-        var $this = $(this);
+                        // If changed to locked or unlocked, refresh page
+                        if (response.data.details.locked) {
+                            if ($('form.sp-message-form').length) {
+                                location.reload();
+                            }
+                        } else {
+                            if ($('.sp-ticket-locked').length) {
+                                location.reload();
+                            }
+                        }
+                    }
 
-        // Set it in image so it tries to download it
-        $('<img>').attr("src", $this.data('preview-url')).prependTo($(this));
+                    // Refresh timeago.
+                    if (typeof timeAgo !== 'undefined') {
+                        timeAgo.render($('time.timeago'));
+                    }
+                }
 
-        // Handle image load/error
-        $(this).find('img').on('load', function() {
-            // Handler for .load() called.
-            $this.find('.fa').remove();
-        }).on('error', function() {
-            // If 404 or other error
-            // Replace preview link with download link
-            $this.parents('a').removeClass('attachment-preview').attr('href', $this.data('download-url'));
-            $this.parents('li').find('.preview-hover strong').html('<i class="fa fa-download"></i> &nbsp; '
-                + Lang.get('general.download'));
+                // Update the last poll time
+                lastReplyPoll = response.timestamp;
+            },
+            dataType: "json",
+            complete: function () {
+                // Delay the next poll by 15 seconds
+                pollTimeout = setTimeout(function () {
+                    pollReplies();
+                }, 15000);
+            }
+        });
+    }
 
-            // Stop the lightbox working for this item
-            var $lg = $this.parents('.attachments');
-            $lg.data('lightGallery').destroy(true);
-            $lg.lightGallery({
-                selector: '.attachment-preview',
-                counter: false
-            });
+    /*
+     * Displays message and highlights it temporarily
+     */
+    function showMessage(message)
+    {
+        // Show new message
+        if (descReplyOrder) {
+            message = $(message).prependTo($('.sp-message-block'));
+        } else {
+            message = $(message).insertAfter($('.sp-message').last());
+        }
 
-            // Show the default icon
-            $this.replaceWith('<span class="fiv-viv fiv-icon-' + $this.data('icon') + '"></span>');
-        })
+        // Load attachment previews if needed
+        App.attachments.loadPreviews(message);
 
-        $(this).removeAttr('data-preview-url');
-    });
-}
+        // Special effects, set as blue for 10 seconds.
+        message.toggleClass('sp-new-message', 1000);
+        setTimeout(function () {
+            message.toggleClass('sp-new-message', 1000);
+        }, 10000);
+    }
+});

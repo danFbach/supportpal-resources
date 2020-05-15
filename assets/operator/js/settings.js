@@ -1,19 +1,4 @@
 $(function() {
-    // Add CodeMirror editor.
-    if ($('textarea[name=global_email_header]').length) {
-        $('textarea[name=global_email_header]').initCodeMirror();
-    }
-    if ($('textarea[name=global_email_footer]').length) {
-        $('textarea[name=global_email_footer]').initCodeMirror();
-    }
-
-    // The editor needs refreshing if it's rendered while out-of-view for some reason..
-    $('.tabs li').on('click', function () {
-        $('.CodeMirror').each(function(i, el){
-            el.CodeMirror.refresh();
-        });
-    });
-
     $('.validate-smtp').on('click', function () {
         // Get data
         var data = {
@@ -134,20 +119,20 @@ function SslWarning(parameters)
                 value = $('input[name="enable_ssl"]:checked').val();
 
             if (value == 1) {
-                swal({
+                Swal.fire({
                     customClass: 'delete-modal',
                     title: Lang.get('messages.does_look_correct'),
-                    html: '<div class="warning-box">' + Lang.get('core.enable_ssl_warning') + '</div>'
-                    + Lang.get('core.verify_frontend_loads') + '<br /><br />'
-                    + '<iframe style="width: 100%;" src="' + instance.getSslRoute() + '"></iframe>',
+                    html: '<div class="sp-alert sp-alert-warning">' + Lang.get('core.enable_ssl_warning') + '</div>'
+                        + Lang.get('core.verify_frontend_loads') + '<br /><br />'
+                        + '<iframe style="width: 100%;" src="' + instance.getSslRoute() + '"></iframe>',
                     type: "warning",
                     showCancelButton: true,
                     confirmButtonColor: "#e74c3c",
                     confirmButtonText: Lang.get('messages.no_revert'),
                     cancelButtonText: Lang.get('general.yes'),
                     allowOutsideClick: false
-                }, function (isConfirm) {
-                    if (isConfirm) {
+                }).then(function (result) {
+                    if (result.value) {
                         if (type == 'checkbox') {
                             $(self).prop('checked', false);
                         } else {
@@ -159,6 +144,6 @@ function SslWarning(parameters)
                 // Set another value, update the current value
                 currentSSLValue = value;
             }
-        });  
+        });
     };
 }

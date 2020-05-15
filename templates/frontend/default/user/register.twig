@@ -2,10 +2,6 @@
 
 {% block title %}{{ Lang.get('user.register') }}{% endblock %}
 
-{% block scripts_header %}
-<script src="{{ asset_rev('resources/assets/frontend/js/recaptcha.js') }}"></script>
-{% endblock %}
-
 {% block breadcrumb %}
     {{ parent() }}
     {{ Lang.get('user.register_account') }}
@@ -15,30 +11,33 @@
 
     {% if register_success|default is not empty and register_success %}
 
-        <div class="success box">{{ Lang.get('user.success_register') }}</div>
+        <div class="sp-alert sp-alert-success">{{ Lang.get('user.success_register') }}</div>
         {{ Lang.get('user.success_register_desc') }}
 
     {% else %}
 
         {% if Session.has('social_metadata') %}
-            <div class="box options">
+            <div class="sp-alert">
                 {{ Lang.get('user.social_linking_register') }}
                 <br /><br />
-                {{ Lang.get('user.already_registered') }} <a href="{{ route('user.login', {'social': 1}) }}">{{ Lang.get('user.login') }} &raquo;</a>
+                {{ Lang.get('user.already_registered') }}
+                <a href="{{ route('user.login', {'social': 1}) }}">{{ Lang.get('user.login') }} &raquo;</a>
             </div>
         {% else %}
             {% if not socialite_providers.isEmpty() %}
-                {% for provider, metadata in all_providers %}
-                    {% if socialite_providers.contains('name', provider) %}
-                        <a href="{{ route('user.oauth_redirect', {'provider': provider}) }}" class="social-login" style="background: {{ metadata.colour }};">
-                            <span class="icon">
-                                <i class="fa fa-{{ provider }} fa-fw"></i>
-                            </span> &nbsp;
-                            {{ Lang.get('user.register_with', {'provider': metadata.name }) }}
-                        </a>
-                        &nbsp;&nbsp;
-                    {% endif %}
-                {% endfor %}
+                <div class="sp--m-3/2 sp-text-center">
+                    {% for provider, metadata in all_providers %}
+                        {% if socialite_providers.contains('name', provider) %}
+                            <a href="{{ route('user.oauth_redirect', {'provider': provider}) }}"
+                               class="sp-social-login sp-px-4 sp-m-3/2" style="background-color: {{ metadata.colour }};">
+                            <span class="sp-mr-1">
+                                <i class="fab fa-{{ provider }} fa-fw"></i>
+                            </span>
+                                {{ Lang.get('user.login_via', {'provider': metadata.name }) }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
 
                 <hr />
             {% endif %}
@@ -50,14 +49,23 @@
 
             {% include 'frontend.' ~ template ~ '.user.forms.organisation' %}
 
-            {% include 'frontend.' ~ template ~ '.forms.customfields' with {'new': true} %}
+            {% include 'frontend.' ~ template ~ '.forms.custom_fields' with {'new': true} %}
 
             {% if Config.get('settings.captcha_type') != 0 and Config.get('settings.registration_captcha') %}
-                {{ Captcha.getHtml() }}
+                {% if Captcha.isVisible() %}
+                    <div class="sp-form-row sp-items-center">
+                        <label>{{ Lang.get('core.captcha') }}</label>
+                        <div class="sp-input-container">
+                            {{ Captcha.getHtml() }}
+                        </div>
+                    </div>
+                {% else %}
+                    {{ Captcha.getHtml() }}
+                {% endif %}
             {% endif %}
 
-            <div class="form-button">
-                {{ form_submit(Lang.get('user.register'), { 'class': 'btn btn-primary' }) }}
+            <div class="sp-form-button">
+                {{ form_submit(Lang.get('user.register')) }}
             </div>
 
         {{ form_close() }}
@@ -67,17 +75,19 @@
 {% endblock %}
 
 {% block scripts_footer %}
+    <!-- Redactor -->
+    <script src="{{ asset_rev('resources/assets/libs/editor.min.js') }}"></script>
+    <script src="{{ asset_rev('resources/assets/general/js/editor_config.js') }}"></script>
+
     <!-- Custom fields -->
     <script src="{{ asset_rev('resources/assets/general/js/customfields.js') }}"></script>
-    <script src="{{ asset_rev('resources/assets/libs/editor.min.js') }}"></script>
-    <link rel="stylesheet" type="text/css" href="{{ asset_rev('resources/assets/frontend/css/redactor.css') }}">
     <script type="text/javascript">
         $(document).ready(function() {
             // Enable hide/show password toggle
             callHideShowPassword();
 
             // Date picker
-            callPikaday();
+            $('.datepicker').datepicker();
         });
     </script>
 

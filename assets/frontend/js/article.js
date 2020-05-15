@@ -1,12 +1,13 @@
-$(document).ready(function() {
-    // Open links in comments (not anchors) in a new window/tab
-    $(".commentText a:not([href^='#'])").attr('target', '_blank');
+$(document).ready(function () {
+    // Open links in comments (not anchors) in a new window/tab. Needs rel="noopener" due to
+    // https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+    $(".sp-comment-text a:not([href^='#'])").attr('target', '_blank').attr('rel', 'noopener');
 
     // Change ordering
-    $('.commentOrdering').on('change', function() {
+    $('.sp-comment-ordering').on('change', function () {
         // Show loading
-        var $loading = $(this).parent().find('.loading');
-        $loading.show();
+        var $loading = $(this).parent().find('.sp-loading');
+        $loading.removeClass('sp-hidden');
 
         // Make call
         $.get(
@@ -16,127 +17,138 @@ $(document).ready(function() {
                 "typeId": typeId,
                 "order": $(this).val(),
             },
-            function(response) {
+            function (response) {
                 if (response.status == 'success') {
-                    $('div.commentsBlock').html(response.data.comments);
-                    if ($('.commentsBlock > ul.comments > li').length >= response.data.comment_total) {
+                    $('.sp-comments-block').html(response.data.comments);
+                    if ($('.sp-comments-block > .sp-comments > .sp-comment').length >= response.data.comment_total) {
                         // Hide show more option
-                        $('.more-parents').parent().hide();
+                        $('.sp-more-parent-comments').hide();
                     } else {
                         // Show option and update count
-                        $('.more-parents').parent().show().data('count', $('.commentsBlock > ul.comments > li').length);
+                        $('.sp-more-parent-comments').show().data('count', $('.sp-comments-block > .sp-comments > .sp-comment').length);
                     }
                 } else {
                     // Show error
-                    $('.comments-loading.fail').show(500).delay(5000).hide(500);
+                    $('.sp-comments-loading.sp-alert-error').show(500).delay(5000).hide(500);
                 }
             },
             'json'
-        ).fail(function() {
+        ).fail(function () {
             // Show error
-            $('.comments-loading.fail').show(500).delay(5000).hide(500);
-        }).always(function() {
+            $('.sp-comments-loading.sp-alert-error').show(500).delay(5000).hide(500);
+        }).always(function () {
             // Hide loading
-            $loading.hide();
+            $loading.addClass('sp-hidden');
         });
     });
 
     // Fetch more comments
-    $('.more-parents').on('click', function() {
+    $('.sp-more-parent-comments').on('click', function () {
         var $this = $(this);
         $this.prop('disabled', 'disabled');
+
         $.get(
             typeof commentRoute !== 'undefined' ? commentRoute : laroute.route('selfservice.comment'),
             {
                 "articleId": articleId,
                 "typeId": typeId,
-                "order": $('.commentOrdering').val(),
-                "last" : $('.commentsBlock > ul.comments > li:last-child').data('id'),
+                "order": $('.sp-comment-ordering').val(),
+                "last" : $('.sp-comments-block > .sp-comments > .sp-comment:last-child').data('id'),
                 "startParent": $this.data('count')
             },
-            function(response) {
+            function (response) {
                 // Re-enable button
                 $this.prop('disabled', false);
 
                 if (response.status == 'success') {
                     // Add the new comments to the end of the comments list
-                    $(response.data.comments).children('li').appendTo('.commentsBlock > ul.comments');
+                    $(response.data.comments).children('div').appendTo('.sp-comments-block > .sp-comments');
 
                     // Hide the button if we've shown all the comments
-                    if ($('.commentsBlock > ul.comments > li').length >= response.data.comment_total) {
-                        $this.parent().hide();
+                    if ($('.sp-comments-block > .sp-comments > .sp-comment').length >= response.data.comment_total) {
+                        $this.hide();
                     } else {
                         // Update the number of parents
-                        $this.data('count', $('.commentsBlock > ul.comments > li').length);
+                        $this.data('count', $('.sp-comments-block > .sp-comments > .sp-comment').length);
                     }
                 } else {
                     // Show error
-                    $('.comments-loading.fail').show(500).delay(5000).hide(500);
+                    $('.sp-comments-loading.sp-alert-error').show(500).delay(5000).hide(500);
                 }
             },
             'json'
-        ).fail(function() {
+        ).fail(function () {
             // Re-enable button
             $this.prop('disabled', false);
+
             // Show error
-            $('.comments-loading.fail').show(500).delay(5000).hide(500);
+            $('.sp-comments-loading.sp-alert-error').show(500).delay(5000).hide(500);
         });
     });
-    $(document.body).on('click', '.show-children', function() {
+
+    $(document.body).on('click', '.sp-show-children-comments', function () {
         var $this = $(this);
         $this.prop('disabled', 'disabled');
+
         $.get(
             typeof commentRoute !== 'undefined' ? commentRoute : laroute.route('selfservice.comment'),
             {
                 "articleId": articleId,
                 "typeId": typeId,
-                "order": $('.commentOrdering').val(),
+                "order": $('.sp-comment-ordering').val(),
                 "parentId": $this.data('parent')
             },
-            function(response) {
+            function (response) {
                 // Re-enable button
                 $this.prop('disabled', false);
 
                 if (response.status == 'success') {
                     // Replace current list with new list
-                    $this.parent().find('ul.comments').replaceWith(response.data.comments);
+                    $this.parent().find('.sp-comments').replaceWith(response.data.comments);
                     // Remove link
                     $this.remove();
                 } else {
                     // Show error
-                    $('.comments-loading.fail').show(500).delay(5000).hide(500);
+                    $('.sp-comments-loading.sp-alert-error').show(500).delay(5000).hide(500);
                 }
             },
             'json'
-        ).fail(function() {
+        ).fail (function () {
             // Re-enable button
             $this.prop('disabled', false);
+
             // Show error
-            $('.comments-loading.fail').show(500).delay(5000).hide(500);
+            $('.sp-comments-loading.sp-alert-error').show(500).delay(5000).hide(500);
         });
     });
 
     // Handle comment actions
-    $('.commentsBlock')
+    $('.sp-comments-block')
         // Handles showing hidden comments
-        .on('click', '.commentHidden', function(e) {
+        .on('click', '.sp-comment-hidden', function () {
             // Show the form
             $(this).next().show();
+
             // Add comment parent id to the form
             $(this).remove();
         })
 
         // Handles the comment reply form
-        .on('click', '.commentReply', function() {
+        .on('click', '.sp-reply-to-comment', function () {
             // Update parent ID on form
             $(".add-comment").find('input[name=parent_id]').val($(this).data('id'));
 
             // Get name of parent comment
-            var name = $(this).parent().parent().parent().find('> .author').text();
+            var name = $(this).parent().parent().find('> .sp-message-header .sp-name').text();
 
             // Show name of being replied to
-            $('.reply-name').text(name);
-            $('.replying-to').show();
+            $('.sp-reply-name').text(name);
+            $('.sp-replying-to').show();
+
+            // Hover to the reply form
+            $('html, body, #content').animate({
+                scrollTop: $(".add-comment-form").position().top - 24
+            }, 500);
 
             // Add to textarea
             name = $.trim(name.replace(/\s/g, ''));
@@ -146,21 +158,14 @@ $(document).ready(function() {
             if (! $('.add-comment-form').next().is(':visible')) {
                 $('.add-comment-form').trigger('click');
             }
-
-            // Hover to the reply form
-            $('html, body').animate({
-                scrollTop: $(".add-comment-form").offset().top - 25
-            }, 500);
         })
 
         // Handles the rating of a comment
-        .on('click', '.commentRating', function(e) {
-            e.preventDefault();
-
+        .on('click', '.sp-rate-comment', function () {
             // Save element for later
             var $this = $(this),
                 // Get the other thumb so we can reset it
-                $that = $this.data('score') == '1' ? $(this).next() : $(this).prev();
+                $that = $this.data('score') == '1' ? $this.next(['data-score']) : $this.prev('[data-score]');
 
             // Post data
             $.post(
@@ -169,14 +174,15 @@ $(document).ready(function() {
                     "comment_id": $this.data('comment'),
                     "score": $this.data('score')
                 },
-                function(response) {
+                function (response) {
                     if (response.status == 'success') {
-                        // Update image, reset other thumb
-                        $this.toggleClass('clicked');
-                        $that.removeClass('clicked');
+                        // Update thumb colour, reset other thumb
+                        $this.find('.fas').hasClass('sp-text-secondary') ? $this.find('.fas').removeClass('sp-text-secondary') : $this.find('.fas').addClass('sp-text-secondary');
+                        $that.find('.fas').removeClass('sp-text-secondary');
+
                         // Update article rating
                         if (response.data !== null) {
-                            $this.parent().find('.score').show().text(response.data);
+                            $this.parents('.sp-comment-options').find('.sp-comment-rating').show().text(response.data);
                         }
                     }
                 },
@@ -185,41 +191,92 @@ $(document).ready(function() {
         });
 
     // Handles cancelling a reply
-    $('.cancel-reply').on('click', function() {
+    $('.sp-cancel-reply').on('click', function () {
         // Update parent ID on form to null
         $(".add-comment").find('input[name=parent_id]').val(null);
 
         // Hide name
-        $('.replying-to').hide();
+        $('.sp-replying-to').hide();
 
         // Clear textarea
         $(".add-comment").find('textarea').val('');
     });
 
     // Handles the rating of an article
-    $('a.rate-article').on('click', function() {
-        var score = $(this).data('score');
+    $('.sp-rate-article').on('click', function () {
+        var $this = $(this),
+            rating = $this.data('rating'),
+            feedbackLog = null;
 
-        // Post data
-        $.post(
-            laroute.route('selfservice.article.rating', {'id': articleId }),
-            {
-                "score": score
-            },
-            function(response) {
+        Swal.fire({allowOutsideClick: false});
+        Swal.showLoading();
+
+        $.post(laroute.route('selfservice.article.rating', {'id': articleId}), {"rating": rating})
+            .then(function (response) {
                 if (response.status == 'success') {
-                    $('span.rate-article').remove();
-                    if (showRatings == '0' || loggedIn) {
-                        if (score == 1) {
-                            $('.positive-users').text(parseInt($('.positive-users').text()) + 1);
-                        }
-                        $('.total-users').text(parseInt($('.total-users').text()) + 1);
-                        $('.article-rating').show();
-                    }
+                    feedbackLog = response.data.record;
+
+                    $.get(laroute.route("selfservice.article.feedback", {'id': articleId}))
+                        .then(function (response) {
+                            if (response.status === "error") {
+                                return Swal.close();
+                            }
+
+                            // No feedback form
+                            if (response.data === null) {
+                                $this.parents('.sp-rate-article-container')
+                                    .text(Lang.get('selfservice.thank_you_for_feedback'));
+
+                                return Swal.fire({
+                                    title: null,
+                                    html: Lang.get('selfservice.thank_you_for_feedback'),
+                                    type: 'success',
+                                    showConfirmButton: false,
+                                    timer: 2000,
+                                });
+                            }
+
+                            Swal.fire({
+                                html: response.data,
+                                confirmButtonText: Lang.get('general.save'),
+                                cancelButtonText: Lang.get('general.dismiss'),
+                                showCancelButton: true,
+                                showLoaderOnConfirm: true,
+                                allowOutsideClick: false,
+                                onOpen: function () {
+                                    callHideShowPassword();
+
+                                    // Date picker
+                                    $(Swal.getContent()).find('.datepicker').datepicker();
+                                },
+                                preConfirm: function () {
+                                    var data = $(Swal.getContent()).find("input, textarea, select").serializeArray();
+                                    data.push({name: '_token', value: $('meta[name="csrf_token"]').prop('content') });
+
+                                    $.post(laroute.route('selfservice.article.feedback.store', {'id': feedbackLog.id}), data);
+                                }
+                            }).then(function (result) {
+                                if (result.value) {
+                                    $this.parents('.sp-rate-article-container')
+                                        .text(Lang.get('selfservice.thank_you_for_feedback'));
+
+                                    Swal.fire({
+                                        title: null,
+                                        html: Lang.get('selfservice.thank_you_for_feedback'),
+                                        showConfirmButton: false,
+                                        type: 'success',
+                                        timer: 2000,
+                                    });
+                                }
+                            })
+                        })
+                        .fail(function () {
+                            return Swal.close();
+                        });
+                } else {
+                    return Swal.close();
                 }
-            },
-            'json'
-        );
+            });
     });
 
 });

@@ -1,0 +1,85 @@
+<div class="sp-sidebar sp-hidden sp-flex-none sp-ml-8 sp-w-64 lg:sp-block print:sp-hidden">
+    {{ View.fireHook('frontend.sidebar_start') }}
+
+    {% if categories is not empty and not categories.isEmpty() %}
+        <div class="sp-sidebar-box">
+            <h2>{{ Lang.choice('selfservice.category', 2) }}</h2>
+            <ul id="kb_cat_list" class="sp-nav">
+                {% for category in categories %}
+                    {% if category.parent_id is empty %}
+                        <li id="li-{{ category.id }}"><span class="list_expand fas" id="expand-{{ category.id }}"></span>
+                            <a href="{{ category.frontend_url }}" title="{{ category.name }}">
+                                {% if category.count is not empty %}<span class="sp-badge sp-float-right">{{ category.count }}</span>{% endif %}
+                                <div class="nav-item" {% if currentCategory is not empty and currentCategory == category.id %}style="font-weight: bold;"{% endif %}>{{ category.name }}</div>
+                            </a>
+                            <ul id="ul-{{ category.id }}" class="hidden">
+                                {% for _category in categories %}
+                                    {% if _category.parent_id == category.id %}
+                                        <li id="li-{{ _category.id }}"><span class="list_expand fas" id="expand-{{ _category.id }}"></span>
+                                            <a href="{{ _category.frontend_url }}" title="{{ _category.name }}">
+                                                {% if _category.count is not empty %}<span class="sp-badge sp-float-right">{{ _category.count }}</span>{% endif %}
+                                                <div class="nav-item" {% if currentCategory is not empty and currentCategory == _category.id %}style="font-weight: bold;"{% endif %}>{{ _category.name }}</div>
+                                            </a>
+                                            <ul id="ul-{{ _category.id }}" class="hidden">
+                                                {% for __category in categories %}
+                                                    {% if __category.parent_id == _category.id %}
+                                                        <li id="li-{{ __category.id }}"><span class="list_expand fas" id="expand-{{ __category.id }}"></span>
+                                                            <a href="{{ __category.frontend_url }}" title="{{ __category.name }}">
+                                                                {% if __category.count is not empty %}<span class="sp-badge sp-float-right">{{ __category.count }}</span>{% endif %}
+                                                                <div class="nav-item" {% if currentCategory is not empty and currentCategory == __category.id %}style="font-weight: bold;"{% endif %}>{{ __category.name }}</div>
+                                                            </a>
+                                                            <ul id="ul-{{ __category.id }}" class="hidden">
+                                                                {% for ___category in categories %}
+                                                                    {% if ___category.parent_id == __category.id %}
+                                                                        <li id="li-{{ ___category.id }}"><span class="list_expand fas" id="expand-{{ ___category.id }}"></span>
+                                                                            <a href="{{ ___category.frontend_url }}" title="{{ ___category.name }}">
+                                                                                {% if ___category.count is not empty %}<span class="sp-badge sp-float-right">{{ ___category.count }}</span>{% endif %}
+                                                                                <div class="nav-item" {% if currentCategory is not empty and currentCategory == ___category.id %}style="font-weight: bold;"{% endif %}>{{ ___category.name }}</div>
+                                                                            </a>
+                                                                            <ul id="ul-{{ ___category.id }}" class="hidden">
+                                                                                {% for ____category in categories %}
+                                                                                    {% if ____category.parent_id == ___category.id %}
+                                                                                        <li>
+                                                                                            <a href="{{ ____category.frontend_url }}" title="{{ ____category.name }}">
+                                                                                                {% if ____category.count is not empty %}<span class="sp-badge sp-float-right">{{ ____category.count }}</span>{% endif %}
+                                                                                                <div class="nav-item" {% if currentCategory is not empty and currentCategory == ____category.id %}style="font-weight: bold;"{% endif %}>{{ ____category.name }}</div>
+                                                                                            </a>
+                                                                                        </li>
+                                                                                    {% endif %}
+                                                                                {% endfor %}
+                                                                            </ul>
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    {% if tags is not empty and not tags.isEmpty() %}
+        <div class="sp-sidebar-box">
+            <h2>{{ Lang.choice('selfservice.tag', 2) }}</h2>
+            <ul class="sp-nav">
+                {% for tag in tags %}
+                    <li>
+                        <a href="{{ route('selfservice.tag', { 'frontendType': type.slug, 'slug': tag.slug }) }}">
+                            {{ tag.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {{ View.fireHook('frontend.sidebar_end') }}
+</div>

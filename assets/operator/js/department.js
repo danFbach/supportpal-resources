@@ -106,13 +106,13 @@ jQuery(function($){
         render: {
             item: function(item, escape) {
                 return '<div class="item">'
-                    + '<span class="statusIcon" style="background: ' + escape(item.colour) + ';"></span> &nbsp;'
+                    + '<i class="fas fa-circle" style="color: ' + escape(item.colour) + ';"></i> &nbsp;'
                     + escape(item.name)
                     + '</div>';
             },
             option: function(item, escape) {
                 return '<div>'
-                    + '<span class="statusIcon" style="background: ' + escape(item.colour) + ';"></span> &nbsp;'
+                    + '<i class="fas fa-circle" style="color: ' + escape(item.colour) + ';"></i> &nbsp;'
                     + escape(item.name)
                     + '</div>';
             }
@@ -137,13 +137,13 @@ jQuery(function($){
          render: {
              item: function(item, escape) {
                  return '<div class="item">'
-                     + '<img class="avatar" src=' + escape(item.avatar_url) + '" width="16" /> &nbsp;'
+                     + '<img class="sp-avatar sp-max-w-3xs" src="' + escape(item.avatar_url) + '" />&nbsp; '
                      + escape(item.formatted_name)
                      + '</div>';
              },
              option: function(item, escape) {
                  return '<div>'
-                     + '<img class="avatar" src="' + escape(item.avatar_url) + '" width="16" /> &nbsp;'
+                     + '<img class="sp-avatar sp-max-w-2xs" src="' + escape(item.avatar_url) + '" />&nbsp; '
                      + escape(item.formatted_name)
                      + '</div>';
              }
@@ -164,13 +164,13 @@ jQuery(function($){
         render: {
             item: function(item, escape) {
                 return '<div class="item">'
-                    + '<img class="avatar" src="' + escape(item.avatar_url) + '" width="16" /> &nbsp;'
+                    + '<img class="sp-avatar sp-max-w-3xs" src="' + escape(item.avatar_url) + '" />&nbsp; '
                     + escape(item.formatted_name)
                     + '</div>';
             },
             option: function(item, escape) {
                 return '<div>'
-                    + '<img class="avatar" src="' + escape(item.avatar_url) + '" width="16" /> &nbsp;'
+                    + '<img class="sp-avatar sp-max-w-2xs" src="' + escape(item.avatar_url) + '" />&nbsp; '
                     + escape(item.formatted_name)
                     + '</div>';
             }
@@ -258,12 +258,12 @@ jQuery(function($){
 
     // Handle Disable User Replies.
     $('input[name="disable_user_email_replies"]').on('change', function () {
-        $('#disableRepliesTemplate').toggle();
+        $('#disableRepliesTemplate').toggleClass('sp-hidden');
     });
 
     // Handle Registered Users Only.
     $('input[name="registered_only"]').on('change', function () {
-        $('#registeredOnlyTemplate').toggle();
+        $('#registeredOnlyTemplate').toggleClass('sp-hidden');
     });
 
     // Convert email template dropdowns to use selectize.

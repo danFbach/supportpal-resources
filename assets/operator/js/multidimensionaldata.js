@@ -15,14 +15,14 @@ $(document).ready(function() {
         placeholder: $(selector).attr('title'),
         onChange: function (value) {
             // Add the new DOM within the current tab.
-            var $tab = this.$input.parents('.tabContent'),
+            var $tab = this.$input.parents('.sp-tab-content'),
                 $container = $tab.find('.section-items');
 
             // Clone the DOM element.
             var newElem = $tab.find('.section-item:first').clone();
 
             // Show the remove button.
-            newElem.find('button.remove-button').removeClass('hide');
+            newElem.find('button.remove-button').removeClass('sp-hidden');
 
             // Set the language code for all inputs in the new element.
             newElem.find('input[type="hidden"]:not(.mdd-ignore)').val(value);
@@ -35,18 +35,21 @@ $(document).ready(function() {
                 [ 'name', 'for', 'id' ].map(attributeMapper.bind(null, elem, value));
             });
 
-            // Initialise redactor on new textarea.
-            if (newElem.find('textarea:not(.not-redactor)').length > 0) {
-                newElem.find('textarea:not(.not-redactor)').redactor($.extend($.Redactor.default_opts, opts));
+            // Initialise redactor or source code editor on new textarea.
+            if (newElem.find('textarea.redactor').length > 0) {
+                newElem.find('textarea.redactor').redactor(opts);
+            }
+            if (newElem.find('textarea.source-code').length > 0) {
+                newElem.find('textarea.source-code').sourcecode(opts);
             }
 
             // Initialise file upload.
-            if (typeof FileUpload !== 'undefined' && newElem.find('.fileupload').length > 0) {
+            if (typeof FileUpload !== 'undefined' && newElem.find('.sp-file-upload').length > 0) {
                 var settings = {
-                        $element: newElem.find('.fileupload'),
+                        $element: newElem.find('.sp-file-upload'),
                         $container: newElem
                     },
-                    inputName = newElem.find('.attachment-details')
+                    inputName = newElem.find('.sp-attachment-details')
                         .find('input[type=hidden]')
                         .prop('name').replace('[]', '');
 
@@ -70,13 +73,13 @@ $(document).ready(function() {
 
             // Focus and scroll to new element.
             $container.find('.section-item:last :input:first').trigger('focus');
-            $('html, body').animate({
-                scrollTop: $container.find('.section-item:last label:first').offset().top - 55
+            $('#content').animate({
+                scrollTop: $container.find('.section-item:last').position().top
             }, 500);
 
             // Hide the drop-down if there are no options.
             if (Object.keys(this.options).length === 0) {
-                this.$input.parents('.form-container').hide();
+                this.$input.parents('.sp-form-container').hide();
             }
 
             // Trigger DOM event.
@@ -88,7 +91,7 @@ $(document).ready(function() {
      * Remove item from the DOM.
      */
     $('#sectionWrapper').on('click', '.remove-button', function() {
-        var $selector = $(this).parents('.tabContent').find(selector),
+        var $selector = $(this).parents('.sp-tab-content').find(selector),
             $sectionItem = $(this).parents('.section-item');
 
         // Add the language back to the drop-down.
@@ -101,7 +104,7 @@ $(document).ready(function() {
 
         // Show the language drop-down if there are now options.
         if (Object.keys(selectize.options).length !== 0) {
-            $selector.parents('.form-container').show();
+            $selector.parents('.sp-form-container').show();
         }
 
         // Remove the template.

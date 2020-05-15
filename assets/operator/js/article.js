@@ -29,7 +29,7 @@ function Article(parameters)
             plugins: ['disableDelete'],
             onChange: function(value) {
                 // Hide the URL/views for this type
-                this.$input.parents('.form-container').find('.type-url, .type-views').remove();
+                this.$input.parents('.sp-form-container').find('.type-url, .type-views').remove();
 
                 // Only carry on if we have a type
                 if (!value.length) return;
@@ -53,7 +53,7 @@ function Article(parameters)
                 select_categories.load(function(callback) {
                     xhr[id] && xhr[id].abort();
                     xhr[id] = $.ajax({
-                        url: laroute.route('selfservice.operator.type.categories', { 'type': value }),
+                        url: laroute.route('selfservice.operator.type.categories', {'operatorSelfserviceType': value}),
                         success: function(res) {
                             select_categories.enable();
                             callback(res.data);
@@ -78,12 +78,12 @@ function Article(parameters)
             render: {
                 item: function(item, escape) {
                     return '<div class="item">' + escape(item.name) +
-                        '<span class="description">' + escape(item.hierarchy) + '</span>' +
+                        '<span class="sp-description">' + escape(item.hierarchy) + '</span>' +
                         '</div>';
                 },
                 option: function(item, escape) {
                     return '<div>' + escape(item.name) +
-                        '<span class="description">' + escape(item.hierarchy) + '</span>' +
+                        '<span class="sp-description">' + escape(item.hierarchy) + '</span>' +
                         '</div>';
                 }
             }
@@ -159,7 +159,7 @@ $(document).ready(function() {
     });
 
     // Initialise redactor.
-    $('.section-items').find('textarea[name^="text"]').redactor($.extend($.Redactor.default_opts, opts));
+    $('.section-items').find('textarea[name^="text"]').redactor(opts);
 
     /*
      * Initialise article tags.
@@ -176,26 +176,26 @@ $(document).ready(function() {
         maxItems: null,
         placeholder: Lang.get("selfservice.associate_tag")
     });
-    
+
     // Only show published_at when article is published.
     $('#toggle_published').on('change', function () {
         var $published_at = $('.published_at');
         if (this.checked) {
-            $published_at.show();
+            $published_at.removeClass('sp-hidden');
             $published_at.find(':input').removeAttr('disabled');
 
             // If the article is currently not published
             if ($published_at.hasClass('not-published')) {
                 // Update the pickers to the current date and time.
                 var date = new Date();
-                $published_at.find('.datepicker').data('pikaday').setDate(date);
-                $published_at.find('.timepicker').timepicker('setTime', date);
+                $published_at.find('.datepicker')[0]._flatpickr.setDate(date);
+                $published_at.find('.timepicker')[0]._flatpickr.setDate(date);
 
                 // Remove class so it doesn't automatically get set if it's toggled again
                 $published_at.removeClass('not-published');
             }
         } else {
-            $published_at.hide();
+            $published_at.addClass('sp-hidden');
             $published_at.find(':input').prop('disabled', 'disabled');
         }
     });

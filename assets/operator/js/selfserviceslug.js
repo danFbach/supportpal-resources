@@ -44,20 +44,20 @@ var SupportPalSlugGenerator = function (parameters)
         }
 
         // Get the slug for the given name.
-        $.get(route, $.extend({}, {value: value, prevent_duplicate: preventDuplicate|0}, parameters))
+        return $.get(route, $.extend({}, {value: value, prevent_duplicate: preventDuplicate|0}, parameters))
             .done(function (json) {
-                $slugText.text(json.data);
+                $slugText.text(decodeURI(json.data));
                 $slug.find(':input').val(json.data);
                 $slug.find('.slug-uri').contents().unwrap();
 
                 var default_frontend_locale = $('meta[name="default_frontend_locale"]').prop('content'),
-                    locale = $slug.parents('.form-container').find('input[name="locale"][type="hidden"]').val(),
+                    locale = $slug.parents('.sp-form-container').find('input[name="locale"][type="hidden"]').val(),
                     $brandUri = $slug.find('.brand-uri'),
                     regex = new RegExp("\/" + default_frontend_locale + "$", "");
 
                 $brandUri.text($brandUri.text().replace(regex, "/" + (typeof locale === 'undefined' ? default_frontend_locale : locale)));
 
-                $slug.show();
+                $slug.removeClass('sp-hidden');
             })
             .fail(function (jqXHR, textStatus, errorThrown) {
                 console.log(jqXHR.responseText);
@@ -69,7 +69,7 @@ var SupportPalSlugGenerator = function (parameters)
 
     var selector = '.name-input input[type="text"]';
     $(document).on('donetyping', selector, function () {
-        var $slug = $(this).parents('.form-container').find('.slug');
+        var $slug = $(this).parents('.sp-form-container').find('.slug');
 
         // Only make a slug if one doesn't already exist on edit (or edited manually first on create), or we don't want
         // it (e.g. external link type).
@@ -87,27 +87,29 @@ var SupportPalSlugGenerator = function (parameters)
     // Allow editing the slug.
     $('.section-items').on('click', '.edit-slug', function () {
         var self = this,
-            value = $(this).parents('.input-container').find('.slug-text').html();
+            value = $(this).parents('.sp-input-container').find('.slug-text').html();
 
-        swal({
+        Swal.fire({
             title: Lang.get('selfservice.change_slug'),
             html: "<p><input type='text' value='" + value + "' id='slug-modal-input' size='30' /></p>",
             showCancelButton: true,
             confirmButtonText: Lang.get('general.update'),
-            closeOnConfirm: false
-        }, function() {
-            swal.disableButtons();
-
-            var value = $('#slug-modal-input').val();
-            if (value.length > 0) {
-                makeSlug($(self).parents('.slug'), value, false, function () {
-                    swal.closeModal();
-
-                    // Mark the slug as edited
-                    $(self).parents('.slug').removeClass('not-edited');
-                });
-            } else {
-                swal.closeModal();
+            showLoaderOnConfirm: true,
+            focusConfirm: false,
+            preConfirm: function () {
+                var value = $('#slug-modal-input').val();
+                if (value.length > 0) {
+                    return makeSlug($(self).parents('.slug'), value, false, function () {
+                            // Mark the slug as edited
+                            $(self).parents('.slug').removeClass('not-edited');
+                        })
+                        .catch(function () {
+                            Swal.close();
+                        });
+                }
+            },
+            allowOutsideClick: function () {
+                return ! Swal.isLoading();
             }
         });
     });

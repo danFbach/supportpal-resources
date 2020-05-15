@@ -1793,6 +1793,15 @@ iframe[src="about:blank"] {
     CUSTOM
 */
 
+a {
+    transition: 0.2s color;
+}
+
+    a:hover {
+        color: var(--color-primary-900);
+        cursor: pointer;
+    }
+
 #desk_header {
     background: #da3230;
 }
@@ -1901,6 +1910,26 @@ iframe[src="about:blank"] {
         padding: 20px 0;
         border-bottom: 2px solid #a00;
     }
+
+
+header {
+}
+
+    header.sp-bg-primary {
+        background-color: var(--color-primary-800);
+    }
+
+    header a {
+        color: var(--color-background-primary);
+    }
+
+        header a:hover {
+            color: #484848;
+        }
+
+.sp-search {
+    padding: 0 10px;
+}
 /*
     END CUSTOM
 */

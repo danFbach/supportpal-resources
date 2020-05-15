@@ -1,3 +1,12 @@
+$(function () {
+    $('a.show-details').on('click', function (e) {
+        e.preventDefault();
+
+        $(this).parent().next('div.sp-hidden').toggle();
+        $(this).children('button').toggle();
+    });
+});
+
 function AllowedMethods(parameters) {
     "use strict";
 
@@ -22,11 +31,11 @@ function AllowedMethods(parameters) {
             $td = $elem.find('.' + method.toLowerCase() + '-request').find('td');
 
         if (data === expected) {
-            $td.html('<i class="fa fa-check fa-success" aria-hidden="true"></i>&nbsp;' + LANG.success);
+            $td.html('<i class="fas fa-check sp-text-green-600" aria-hidden="true"></i>&nbsp;' + LANG.success);
 
             return true;
         } else {
-            $td.html('<i class="fa fa-times fa-error" aria-hidden="true"></i>&nbsp;' + LANG.notAvailable);
+            $td.html('<i class="fas fa-times sp-text-red-600" aria-hidden="true"></i>&nbsp;' + LANG.notAvailable);
 
             return false;
         }
@@ -64,7 +73,7 @@ function AllowedMethods(parameters) {
      * @returns {number}
      */
     var countRequiredSuccess = function () {
-        return $elem.find('.toggle').find('table.required-methods .fa-success').length;
+        return $elem.find('.sp-hidden').find('table.required-methods .sp-text-green-600').length;
     };
 
     /**
@@ -73,7 +82,7 @@ function AllowedMethods(parameters) {
      * @returns {number}
      */
     var totalRequired = function () {
-        return $elem.find('.toggle').find('table.required-methods tr').length;
+        return $elem.find('.sp-hidden').find('table.required-methods tr').length;
     };
 
     /**
@@ -83,7 +92,7 @@ function AllowedMethods(parameters) {
      */
     var countOptionalSuccess = function ()
     {
-        return $elem.find('.toggle').find('table.optional-methods .fa-success').length;
+        return $elem.find('.sp-hidden').find('table.optional-methods .sp-text-green-600').length;
     };
 
     /**
@@ -93,7 +102,7 @@ function AllowedMethods(parameters) {
      */
     var totalOptional = function ()
     {
-        return $elem.find('.toggle').find('table.optional-methods tr').length;
+        return $elem.find('.sp-hidden').find('table.optional-methods tr').length;
     };
 
     /**
@@ -131,7 +140,7 @@ function AllowedMethods(parameters) {
             isAllowed('OPTIONS', $.Deferred())
         ).then(function () {
             // Show total number of valid requirements.
-            $elem.find('.is-valid').html(
+            $elem.find('.sp-is-valid').html(
                 LANG.requirements
                     .replace(':required_count', countRequiredSuccess())
                     .replace(':total_required', totalRequired())
@@ -140,11 +149,11 @@ function AllowedMethods(parameters) {
             );
 
             // Show success/error icon.
-            $elem.find('.status').find('.fa-success, .fa-orange, .fa-error').hide();
+            $elem.find('.sp-requirement-status').find('.sp-text-green-600, .sp-text-orange-600, .sp-text-red-600').hide();
             if (requiredValid()) {
-                $elem.find('.status').find(optionalValid() ? '.fa-success' : '.fa-orange').show();
+                $elem.find('.sp-requirement-status').find(optionalValid() ? '.sp-text-green-600' : '.sp-text-orange-600').show();
             } else {
-                $elem.find('.status').find('.fa-error').show();
+                $elem.find('.sp-requirement-status').find('.sp-text-red-600').show();
             }
 
             // Determine where the form should submit to.
