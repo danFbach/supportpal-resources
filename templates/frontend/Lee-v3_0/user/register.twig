@@ -53,7 +53,7 @@
 
             {% if Config.get('settings.captcha_type') != 0 and Config.get('settings.registration_captcha') %}
                 {% if Captcha.isVisible() %}
-                    <div class="sp-form-row">
+                    <div class="sp-form-row sp-items-center">
                         <label>{{ Lang.get('core.captcha') }}</label>
                         <div class="sp-input-container">
                             {{ Captcha.getHtml() }}
@@ -84,7 +84,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
             // Enable hide/show password toggle
-            callHideShowPassword();
+            $('input[type=password]').hideShowPassword();
 
             // Date picker
             $('.datepicker').datepicker();

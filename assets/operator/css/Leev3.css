@@ -1,0 +1,20 @@
+/* CUSTOM */
+
+.sp-bg-primary-800 {
+    background-color: #da3230 !important;
+}
+
+#header .search-form .selectize-input, #header .search-form input[type="search"] {
+    background-color: transparent;
+}
+
+header#header {
+    top: 0;
+}
+
+/* override brand accent color */
+.sp-badge, input [type="submit"]:hover, a.button-submit:hover, .white-box button:not(.confirm):hover, .white-box .button.primary:hover, #header .logo, #header input.search, ul.dropdown li.hover, ul.dropdown ul a:hover, ul.dropdown ul a:hover .description, ul.dropdown2 ul a:hover, ul.dropdown2 ul a:hover .fa, #navarea a.nav:hover, #navarea a.activeParent, ul.dropdown li:hover > a.activeParent, #header .search.ui-autocomplete-loading, #header .mobile-nav .fa:hover, #header .mobile-nav.active .fa {
+    background: #da3230 !important;
+}
+
+/* END CUSTOM */

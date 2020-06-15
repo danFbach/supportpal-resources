@@ -19,7 +19,7 @@
 
     {{ View.fireHook('frontend.body_start') }}
 
-    <header class="sp-sticky sp-top-0 sp-z-10002 sp-px-6 sp-bg-primary lg:sp-px-8 print:sp-static print:sp-px-0 print:sp-shadow-none
+    <header class="sp-fixed sp-top-0 sp-z-10002 sp-px-6 sp-bg-primary lg:sp-px-8 print:sp-static print:sp-px-0 print:sp-shadow-none
                    {% if not (route starts with 'core.frontend.home') or not(isModuleEnabled('Selfservice')) %}sp-shadow{% endif %}">
         <div class="sp-container sp-relative sp-py-2 sp-m-auto print:sp-max-w-full">
             {{ View.fireHook('frontend.header_start') }}
@@ -30,12 +30,17 @@
                         {% if get_template_mode(false) == 'sp-theme-dark' %}<img src="{{ get_logo() }}" alt="{{ company }}" class="sp-logo sp-hidden print:sp-inline" />{% endif %}
                     </a>
                     <div class="sp-search sp-absolute sp-hidden sp-flex sp-items-center sp-h-full sp-w-full sp--mt-2 sp-bg-primary sp-z-10 print:sp-hidden">
-                        <div class="sp-flex-grow sp-w-full" id="search-input-container"><form name="search" action="{{ route('core.frontend.search') }}" method="post"><input type="hidden" name="_token" value="{{ csrf_token() }}" /><input type="search" name="query" placeholder="{{ Lang.get('general.search') }}" /></form></div>
+                        <div class="sp-flex-grow sp-w-full" id="search-input-container">
+                            <form name="search" action="{{ route('core.frontend.search') }}" method="post">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}" /><input type="search" name="query" placeholder="{{ Lang.get('general.search') }}" />
+                                <button type="submit"><i class="fa fas" id="fa-cdr"></i></button>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 {#<div class="sp-flex-none print:sp-hidden small-hidden">{% if not (route starts with 'core.frontend.home') and isModuleEnabled('Selfservice') %}<a class="sp-search-button sp-p-2 sp-mr-2"><i class="fas fa-search"></i></a>{% endif %}</div>#}
                 <div class="sp-flex-none sp-hidden lg:sp-block print:sp-hidden">
-                    {% if Config.get('settings.website_url') is not empty %}<a href="{{ Config.get('settings.website_url') }}" class="sp-mr-4">{{ Lang.get('core.back_to_website') }}</a>
+                    {% if Config.get('settings.website_url') is not empty %}<a class="sp-mr-4" href="https://leeprecision.com/" title="Visit https://LeePrecision.com/ to begin shopping!">Shop now!</a>{#<a href="{{ Config.get('settings.website_url') }}" class="sp-mr-4">{{ Lang.get('core.back_to_website') }}</a>#}
                     {% elseif isModuleEnabled('Ticket') %}<a href="{{ route('ticket.frontend.ticket.createStep1') }}" class="sp-mr-4">{{ Lang.get('core.submit_ticket') }}</a>{% endif %}
                     {% if auth_check() %}
                         <div class="sp-dropdown-container sp-relative sp-ml-1">

@@ -5,7 +5,7 @@
     {{ Lang.get('general.home') }}
 {% endblock %}
 
-{% block precontent %}
+{#{% block precontent %}
     {% if isModuleEnabled('Selfservice') %}
         <div class="sp-search-container sp-sticky sp-px-6 sp-bg-primary sp-shadow print:sp-hidden">
             <div class="sp-container sp-pb-3 sp-m-auto sm:sp-pb-6 lg:sp-pt-3 lg:sp-pb-12">
@@ -16,12 +16,13 @@
                     <form name="search" action="{{ route('core.frontend.search') }}" method="post">
                         <input type="hidden" name="_token" value="{{ csrf_token() }}" />
                         <input type="search" name="query" placeholder="{{ Lang.get('general.search') }}" />
+                        <button type="submit"><i class="fa fas" id="fa-cdr"></i></button>
                     </form>
                 </div>
             </div>
         </div>
     {% endif %}
-{% endblock %}
+{% endblock %}#}
 
 {% block content %}
 
@@ -99,12 +100,12 @@
 
                         {% if isCollapsible %}
                             <span class="sp-ml-auto">
-                                <i class="fas fa-chevron-up"></i>
+                                <i class="fas fa-chevron-down"></i>
                             </span>
                         {% endif %}
                     </div>
                     {% if isCollapsible %}
-                        <div class="sp-hidden sp-mt-6">
+                        <div class="sp-mt-6">
                             {% include 'frontend.' ~ template ~ '.selfservice.article_list' with {'articles': type.articles, 'noRssFeed': true} %}
 
                             <div class="sp-mt-6">
@@ -125,7 +126,7 @@
     <script type="text/javascript">
         $(function () {
             // Set a top on the search container so the header has a shadow on scrolling.
-            $('.sp-search-container').css('top', $('header').height() - $('.sp-search-container').height());
+            //$('.sp-search-container').css('top', $('header').height() - $('.sp-search-container').height());
 
             // Allow clicking on the type name, without toggling the section content.
             $('.sp-dashboard-section a').on('click', function (e) {
