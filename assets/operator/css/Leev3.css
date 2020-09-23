@@ -21,3 +21,17 @@ header#header {
     top: 0;
     position: absolute;
 }
+
+.sp-message {
+    cursor: pointer;
+}
+
+/*#all-messages-container {
+    display: flex;
+    flex-direction: column-reverse;
+}*/
+
+.message-hidden {
+    height: 90px;
+    overflow: hidden;
+}
