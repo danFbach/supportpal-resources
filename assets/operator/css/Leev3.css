@@ -35,3 +35,14 @@ header#header {
     height: 90px;
     overflow: hidden;
 }
+
+@media (max-width: 1080px) {
+    header#header {
+        top: 0;
+        position: absolute;
+    }
+
+    #wrapper {
+        padding-top: 47px;
+    }
+}
