@@ -13,14 +13,14 @@
     {{ form_close() }}
     <div id="all-messages-container">
         {% for message in messages|reverse %}
-            <div class="sp-message sp-message-{{ message.id }}">
+            <div class="sp-message sp-message-{{ message.id }}" ondblclick="$(this).toggleClass('message-hidden')">
                 <div class="sp-flex">
                     <div class="sp-flex-initial sp-hidden sp-mr-4 md:sp-block"><img src="{{ message.user.avatar_url }}" class="sp-avatar sp-max-w-xs md:sp-max-w-md" /></div>
                     <div class="sp-flex-grow">
                         <div class="sp-message-header">
                             {% if message.user_id == auth_user().id %}<span class="sp-float-right"><button class="as-link delete-confirm" data-route="{{ route('core.operator.message.destroy', message.id) }}" data-id="{{ message.id }}"><i class="fas fa-times"></i></button></span>{% endif %}
                             <div class="sp-name sp-text-lg {% if message.user_id == auth_user().id %}sp-text-red-600{% else %}sp-text-green-600{% endif %}">{{ message.user.formatted_name }}</div>
-                            <div class="sp-description">{{ timeago(message.created_at) }}</div>
+                            <div class="sp-description noselect">{{ timeago(message.created_at) }}</div>
                         </div>
                     </div>
                 </div>
@@ -66,8 +66,7 @@
                     });
             });
             ul = $('#all-messages-container');
-            for(i = 4;i < ul.children().length;i++) { $(ul.children()[i]).addClass('message-hidden'); }
-            $('.sp-message').on('click', function(){ $(this).toggleClass('message-hidden'); });
+            for(i = 4;i < ul.children().length ;i++) { $(ul.children()[i]).addClass('message-hidden'); }
         });
     </script>
 {% endblock %}
