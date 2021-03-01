@@ -289,7 +289,7 @@
 {% endblock %}
 
 {% block content %}
-    <span style="display:block;width: 100%;height: auto;position: relative;clear: both;margin-bottom: 20px;padding: 4px 7px;border: 2px solid #da3230;">Hello Lee Team.<br>With cyber threats becoming increasingly serious, I am encouraging you to be extra cautious when opening links and attachments within emails. <b>If you do not recognize the sender and/or the contents seem to be unrelated to our business</b>, be very skeptical of the email's contents. If you ever feel unsure and would like a second opinion before taking action, <b>please</b>, hit the "Ticket to Dan" button and I will personally review the email's legitimacy.<br><span style="text-align: right;width: 100%;display: block;">Thank you in advance, <span style="color: #da3230;">Dan</span>.</span></span>
+    <span style="display:none;width: 100%;height: auto;position: relative;clear: both;margin-bottom: 20px;padding: 4px 7px;border: 2px solid #da3230;">Hello Lee Team.<br>With cyber threats becoming increasingly serious, I am encouraging you to be extra cautious when opening links and attachments within emails. <b>If you do not recognize the sender and/or the contents seem to be unrelated to our business</b>, be very skeptical of the email's contents. If you ever feel unsure and would like a second opinion before taking action, <b>please</b>, hit the "Ticket to Dan" button and I will personally review the email's legitimacy.<br><span style="text-align: right;width: 100%;display: block;">Thank you in advance, <span style="color: #da3230;">Dan</span>.</span></span>
     {% if record|default is not empty %}
         {% if record.name is not empty %}
             {% include 'operator.' ~ template ~ '.user.forms.organisation_tabs' %}

@@ -46,6 +46,23 @@ header#header {
     overflow: hidden;
 }
 
+.sp-theme-dark .sp-redactor-bg-orange .redactor-in, .sp-theme-dark .sp-redactor-bg-orange .redactor-read-only {
+    background: var(--color-primary-400) !important;
+}
+
+.sp-theme-dark .sp-message.sp-note {
+    background-color: var(--color-primary-400);
+    border-width: 0;
+}
+
+.sp-theme-dark a.sp-button {
+    color: var(--color-text-primary);
+    background: linear-gradient(92.05deg, var(--color-text-primary) 15%, #da3230 85%);
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+}
+
 @media (max-width: 1080px) {
     header#header {
         top: 0;

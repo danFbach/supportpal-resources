@@ -1,4 +1,13 @@
-﻿body {
+﻿a {
+    transition: .2s color
+}
+
+    a:hover {
+        color: var(--color-primary-900);
+        cursor: pointer
+    }
+
+body {
     margin: 50px 0 0 0;
 }
 
@@ -123,7 +132,7 @@ a {
     }
 
 .dealer-table img {
-    max-width: 350px;
+    max-width: 100%;
     height: auto;
     margin: 0 auto;
     display: block;
@@ -187,9 +196,12 @@ header .sp-container {
     display: inline-block;
 }
 
-#search-input-container {
-    display: inline-block;
-    width: 100%;
+.sp-dropdown-container .sp-dropdown ul li a, .sp-dropdown-container .sp-dropdown ul li.sp-dropdown-item {
+    color: var(--color-primary-800);
+}
+
+.sp-dropdown-container .sp-dropdown > div, .sp-dropdown-container .sp-dropdown > ul {
+    max-height: unset;
 }
 
 @media only screen and (max-width:479px) {
