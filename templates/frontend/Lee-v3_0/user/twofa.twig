@@ -19,7 +19,7 @@
                 {{ Lang.get('general.no') }}
             </strong>
             {% if not Config.get('settings.force_2fa_users') %}
-                <div class="sp-description">
+                <div class="sp-description sp-mt-3">
                     {% if auth_user().twofa_enabled %}
                         {{ Lang.get('user.two_fa_disable') }}
                     {% else %}

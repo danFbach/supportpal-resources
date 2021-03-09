@@ -55,7 +55,7 @@
             </li>
         {% endif %}
         <li>
-	    <a class="logout-link" data-url="{{ route('user.logout') }}" data-method="post">
+            <a class="logout-link" data-url="{{ route('user.logout') }}" data-method="post">
                 {{ Lang.get('user.logout') }}
             </a>
         </li>
@@ -73,9 +73,15 @@
             </li>
         {% endif %}
     {% endif %}
-    <li><hr class="sp-mx-0 sp-my-4 sp-border-primary-200" /></li>
-    <li><a href="https://leeprecision.com" target="_blank" {% if route starts with 'core.frontend.home' %}class="current"{% endif %}>Shop now!</a></li>
-    {% if Config.get('settings.website_url') is not empty %}<li class="lg:sp-hidden"><a href="{{ Config.get('settings.website_url') }}">{{ Lang.get('core.back_to_website') }}</a></li>{% endif %}
+    {% if Config.get('settings.website_url') is not empty %}
+        <li class="lg:sp-hidden">
+            <hr class="sp-mx-0 sp-my-4 sp-border-primary-200" />
+
+            <a href="{{ Config.get('settings.website_url') }}">
+                {{ Lang.get('core.back_to_website') }}
+            </a>
+        </li>
+    {% endif %}
 
     {{ View.fireHook('frontend.navigation') }}
 </ul>

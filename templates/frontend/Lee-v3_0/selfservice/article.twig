@@ -1,7 +1,12 @@
 {% extends parent_template %}
 
 {% block meta %}
-    <meta name="keywords" content="{{ article.keywords }}" />
+    {% if article.keywords is not empty %}
+        <meta name="keywords" content="{{ article.keywords }}" />
+    {% endif %}
+    {% if article.excerpt is not empty %}
+        <meta name="description" content="{{ article.excerpt }}" />
+    {% endif %}
 {% endblock %}
 
 {% block title %}{{ article.title }}{% endblock %}
@@ -49,7 +54,7 @@
         <!-- Share -->
         <div class="sp-w-full md:sp-w-1/2">
             <span>{{ Lang.get('general.share_via') }}</span>
-            <a href="mailto:?subject=&amp;body={{ article.title }} - {{ article.url(type) }}"
+            <a href="mailto:?body={{ article.title }} - {{ article.url(type) }}"
                class="sp-inline-block sp-h-8 sp-w-8 sp-p-1 sp-ml-1 sp-bg-gray-600 sp-rounded-full sp-text-white
                       sp-text-center sp-align-middle hover:sp-text-white group">
                 <i class="fas fa-envelope group-hover:sp-opacity-75"></i>

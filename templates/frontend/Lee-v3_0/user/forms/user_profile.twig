@@ -63,7 +63,9 @@
                     <div class="twofa-enabled sp-text-red-600 sp-font-bold">{{ Lang.get('general.no') }}</div>
                 {% endif %}
                 {% if not record.twofa_enabled or (record.id == auth_user().id and not Config.get('settings.force_2fa_users', 0)) %}
-                    <a class="sp-button" href="{{ route('user.twofa') }}">{{ Lang.get('general.manage') }}</a>
+                    <div class="sp-mt-3">
+                        <a class="sp-button" href="{{ route('user.twofa') }}">{{ Lang.get('general.manage') }}</a>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -102,9 +104,16 @@
     <div class="sp-form-row">
         {{ form_label('avatar', Lang.get('user.avatar')) }}
         <div class="sp-input-container">
-            {% if record.avatar_url %}
-                <img class="sp-avatar sp-mb-3" src="{{ record.avatar_url }}" />
+            <img class="sp-avatar" src="{{ record.avatar_url }}" />
+            <div class="sp-mt-3 lg:sp-inline-block lg:sp-mt-0 lg:sp-ml-3">
+                {{ form_file('avatar') }}
+            </div>
+            {% if record.getOriginal('avatar') is not null %}
+                <div class="sp-mt-3">
+                    <button class="remove-avatar" type="button" data-url="{{ route('user.avatar.delete') }}">
+                        {{ Lang.get('user.remove_avatar') }}
+                    </button>
+                </div>
             {% endif %}
-            {{ form_file('avatar') }}
         </div>
     </div>

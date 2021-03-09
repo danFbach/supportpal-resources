@@ -7,16 +7,29 @@
     <title>{{ ticket.subject }}</title>
 
     {% include 'frontend.' ~ template ~ '.head_common' %}
+
+    {{ View.fireHook('frontend.head') }}
 </head>
 
 <body class="{{ get_template_mode(false) }} sp-bg-secondary sp-text-primary print:sp-bg-primary" data-disable-pace>
+
+    {{ View.fireHook('frontend.body_start') }}
+
     <div class="xs:sp-px-6 print:sp-p-0">
         <div class="sp-mx-auto sp-mt-6 xs:sp-mb-6">
+            {{ View.fireHook('frontend.wrapper_start') }}
+
             <h2 class="sp-ml-4 xs:sp-ml-0">{{ ticket.subject }}</h2>
 
             <div class="sp-content sp-bg-primary xs:sp-rounded">
+                {{ View.fireHook('frontend.content_start') }}
+
                 {% include 'frontend.' ~ template ~ '.ticket.message' %}
+
+                {{ View.fireHook('frontend.content_end') }}
             </div>
+
+            {{ View.fireHook('frontend.wrapper_end') }}
         </div>
     </div>
 
@@ -40,6 +53,8 @@
             App.attachments.loadPreviews($('.sp-message'));
         });
     </script>
+
+    {{ View.fireHook('frontend.body_end') }}
 
 </body>
 

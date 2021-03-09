@@ -23,14 +23,14 @@
 
         <div class="sp-form-row">
             {{ form_label('email', Lang.get('general.email')) }}
-            <div>
+            <div class="sp-input-container">
                 {{ form_email('email', null, {'autofocus': 'autofocus'}) }}
             </div>
         </div>
 
         <div class="sp-form-row">
             {{ form_label('password', Lang.get('general.password')) }}
-            <div>
+            <div class="sp-input-container">
                 {{ form_password('password') }}
                 <div class="sp-mt-2 sp-description">
                     <a href="{{ route('user.reset') }}">{{ Lang.get('user.forgot_password') }}</a>
@@ -40,7 +40,7 @@
 
         <div class="sp-form-row">
             <label></label>
-            <div class="sp-input-group">
+            <div class="sp-input-container">
                 <label>
                     {{ form_check('remember_me', '1') }} {{ Lang.get('user.remember_me') }}
                 </label>
@@ -49,7 +49,7 @@
 
         <div class="sp-form-row">
             <label></label>
-            <div>
+            <div class="sp-input-container">
                 {{ form_submit(Lang.get('user.login')) }}
             </div>
         </div>
@@ -71,17 +71,7 @@
                         <span class="sp-bg-primary sp-px-4">{{ Lang.get('general.or') }}</span>
                     </div>
 
-                    {% for provider, metadata in all_providers %}
-                        {% if socialite_providers.contains('name', provider) %}
-                            <a href="{{ route('user.oauth_redirect', {'provider': provider}) }}"
-                               class="sp-social-login sp-px-4 sp-m-3/2" style="background-color: {{ metadata.colour }};">
-                                <span class="sp-mr-1">
-                                    <i class="fab fa-{{ provider }} fa-fw"></i>
-                                </span>
-                                {{ Lang.get('user.login_via', {'provider': metadata.name }) }}
-                            </a><br />
-                        {% endif %}
-                    {% endfor %}
+                    {% include 'frontend.' ~ template ~ '.user.social_login_options' with {'new_line': true} %}
                 {% endif %}
             </div>
 
