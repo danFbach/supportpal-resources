@@ -166,6 +166,14 @@
     </div>
 </div>
 
+
+{% if not macros.isEmpty() and can_update_ticket(auth_user(), ticket) %}
+    <div class="sp-sidebox">
+        <div class="sp-collapsible sp-flex" id="ticketMacroSidebox"><div class="sp-icon"><i class="fa fa-magic icon"></i></div><h3>{{ Lang.choice('ticket.macro', 2) }}</h3><div class="sp-chevron"><i class="fas fa-chevron-down" aria-hidden="true"></i></div></div>
+        <div>{% for macro in macros %}<a class="apply-macro" data-macro="{{ macro.id }}" data-description="{{ macro.description }}">{{ macro.name }}</a><br />{% endfor %}</div>
+    </div>
+{% endif %}
+
 {{ View.fireHook('operator.sidebar_ticket') }}
 
 <div class="sp-sidebox {% if customfields is empty %}sp-hidden{% endif %}">
