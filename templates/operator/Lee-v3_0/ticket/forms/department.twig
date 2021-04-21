@@ -287,13 +287,6 @@
                     </div>
 
                     <div class="sp-form-row">
-                        {{ form_label('user_ticket_locked', Lang.get('ticket.reply_to_locked')) }}
-                        <div class="sp-input-container">
-                            {{ form_select('user_ticket_locked', emailTemplates['user_ticket_locked'], record.email_templates['user_ticket_locked']) }}
-                        </div>
-                    </div>
-
-                    <div class="sp-form-row">
                         {{ form_label('user_ticket_waitingresponse', Lang.get('ticket.waiting_for_response')) }}
                         <div class="sp-input-container">
                             {{ form_select('user_ticket_waitingresponse', emailTemplates['user_ticket_waitingresponse'], record.email_templates['user_ticket_waitingresponse']) }}
@@ -406,7 +399,7 @@
     {% if jsValidator|default is not empty %}
         {{ jsValidator|raw }}
     {% endif %}
-    
+
     <!-- Translatable.js dependencies: selectize -->
     <script type="text/javascript" src="{{ asset_rev('resources/assets/operator/js/translatable.js') }}"></script>
 

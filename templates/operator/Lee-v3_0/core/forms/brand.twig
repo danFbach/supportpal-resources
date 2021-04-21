@@ -202,7 +202,7 @@
             <div class="sp-form-row sp-form-full">
                 {{ form_label('global_email_footer', Lang.get('core.global_email_footer')) }}
                 <div class="sp-input-container">
-                    {{ form_source_code('global_email_header') }}
+                    {{ form_source_code('global_email_footer') }}
                     <div class="sp-description">{{ Lang.get('core.global_email_footer_desc') }}</div>
                 </div>
             </div>
@@ -226,7 +226,7 @@
                     </div>
                 </div>
 
-	        {% include 'operator.' ~ template ~ '.core.forms.smtp_tab' with {'email_method': record.email_method} %}
+                {% include 'operator.' ~ template ~ '.core.forms.smtp_tab' with {'email_method': record.email_method} %}
             {% else %}
                 <div class="sp-form-row">
                     {{ form_label('email_method', Lang.get('core.email_method')) }}
@@ -236,7 +236,6 @@
                 </div>
             {% endif %}
         </div>
-
 
         <div id="tabLocale" class="sp-tab-content sp-hidden">
             {% include 'operator.' ~ template ~ '.core.forms.locale_tab' %}

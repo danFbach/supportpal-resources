@@ -539,7 +539,6 @@
                 condition|default is not empty and condition.item == 69 ? condition.value : null,
                 { 'data-item': 69, 'data-operator': 0, 'class': 'sp-hidden' }) }}
 
-
         {{ form_select('conditions[' ~ (condition is defined ? (key is defined ? key : condition.id) : '') ~ '][value]',
                 {
                     0: Lang.get('general.no'),

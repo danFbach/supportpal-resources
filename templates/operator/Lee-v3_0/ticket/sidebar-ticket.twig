@@ -242,20 +242,20 @@
     {% endif %}
 
     {% if not macros.isEmpty() and can_update_ticket(auth_user(), ticket) %}
-        <div class="sidebox">
-            <h3 class="collapsable" id="ticketMacroSidebox">
-                <i class="fa fa-magic icon"></i>
-                {{ Lang.choice('ticket.macro', 2) }}
-                <div class="arrow">
-                    <i class="fa fa-chevron-down"></i>
-                </div>
-            </h3>
-            <div>
-                {% for macro in macros %}
-                <a class="apply-macro" data-macro="{{ macro.id }}" data-description="{{ macro.description }}">{{ macro.name }}</a><br />
-                {% endfor %}
+    <div class="sidebox">
+        <h3 class="collapsable" id="ticketMacroSidebox">
+            <i class="fa fa-magic icon"></i>
+            {{ Lang.choice('ticket.macro', 2) }}
+            <div class="arrow">
+                <i class="fa fa-chevron-down"></i>
             </div>
+        </h3>
+        <div>
+            {% for macro in macros %}
+            <a class="apply-macro" data-macro="{{ macro.id }}" data-description="{{ macro.description }}">{{ macro.name }}</a><br />
+            {% endfor %}
         </div>
+    </div>
     {% endif %}
 
     <div class="sidebox {% if customfields is empty %}hide{% endif %}">
