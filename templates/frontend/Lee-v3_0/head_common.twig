@@ -4,9 +4,11 @@
 <meta name="csrf_token" content="{{ csrf_token() }}" />
 <meta name="token" content="{{ Request.input('token') }}" />
 <meta name="date_format" content="{{ Config.get('settings.date_format') }}" />
+<meta name="time_format" content="{{ Config.get('settings.time_format') }}" />
 <meta name="max_file_size" content="{{ max_file_size }}" />
 <meta name="allowed_files" content="{{ allowed_files }}" />
 <meta name="environment" content="{{ Config.get('app.environment') }}" />
+
 <!-- Icon -->
 {% if Config.get('settings.favicon') is not empty %}
     <link rel="icon" type="image/png" href="{{ Config.get('settings.favicon') }}" sizes="32x32" />

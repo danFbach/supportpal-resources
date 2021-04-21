@@ -15,11 +15,11 @@
     {% set route = Route.currentRouteName() %}
 </head>
 
-<body class="{{ get_template_mode(false) }} sp-bg-secondary sp-text-primary">
+<body class="{{ get_template_mode(false) }} sp-bg-secondary sp-text-primary print:sp-bg-primary">
 
     {{ View.fireHook('frontend.body_start') }}
 
-    <header class="sp-fixed sp-top-0 sp-z-10002 sp-px-6 sp-bg-primary lg:sp-px-8 print:sp-static print:sp-px-0 print:sp-shadow-none
+    <header class="sp-sticky sp-top-0 sp-z-10002 sp-px-6 sp-bg-primary lg:sp-px-8 print:sp-static print:sp-px-0 print:sp-shadow-none
                    {% if not (route starts with 'core.frontend.home') or not(isModuleEnabled('Selfservice')) %}sp-shadow{% endif %}">
         <div class="sp-container sp-relative sp-py-2 sp-m-auto print:sp-max-w-full">
             {{ View.fireHook('frontend.header_start') }}
