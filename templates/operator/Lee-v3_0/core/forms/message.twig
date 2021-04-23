@@ -15,9 +15,25 @@
 
 {% block content %}
 
-    <div>
+    <h2>{{ Lang.get('general.reply') }}</h2>
+
+    {{ form_open({'method': 'PUT', 'route': ['core.operator.message.update', conversation_id], 'class': 'validate'}) }}
+        {{ form_hidden('conversation_id', conversation_id) }}
+
+        <div class="sp-form-row">
+            <div class="sp-input-container">
+                {{ form_redactor('message') }}
+            </div>
+        </div>
+
+        <div class="sp-form-button">
+            {{ form_submit(Lang.get('general.send')) }}
+        </div>
+    {{ form_close() }}
+
+    <div id="all-messages-container" style="display: inline-flex;flex-direction: column-reverse;">
         {% for message in messages %}
-            <div class="sp-message sp-message-{{ message.id }}">
+            <div class="sp-message sp-message-{{ message.id }}" ondblclick="$(this).toggleClass('message-hidden')">
                 <div class="sp-flex">
                     <div class="sp-flex-initial sp-hidden sp-mr-4 md:sp-block">
                         <img src="{{ message.user.avatar_url }}" class="sp-avatar sp-max-w-xs md:sp-max-w-md" />
@@ -45,22 +61,6 @@
             </div>
         {% endfor %}
     </div>
-
-    <h2>{{ Lang.get('general.reply') }}</h2>
-
-    {{ form_open({'method': 'PUT', 'route': ['core.operator.message.update', conversation_id], 'class': 'validate'}) }}
-        {{ form_hidden('conversation_id', conversation_id) }}
-
-        <div class="sp-form-row">
-            <div class="sp-input-container">
-                {{ form_redactor('message') }}
-            </div>
-        </div>
-
-        <div class="sp-form-button">
-            {{ form_submit(Lang.get('general.send')) }}
-        </div>
-    {{ form_close() }}
 
 {% endblock %}
 
@@ -108,5 +108,7 @@
                     });
             });
         });
+        var ul = document.getElementById('all-messages-container').children;
+        for(var child in ul) { if(ul[child] instanceof Element || ul[child] instanceof HTMLDocument) { ul[child].classList.add('message-hidden'); } }
     </script>
 {% endblock %}
