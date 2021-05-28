@@ -31,7 +31,7 @@
         </div>
     {{ form_close() }}
 
-    <div id="all-messages-container" style="display: inline-flex;flex-direction: column-reverse;">
+    <div id="all-messages-container" style="display: inline-flex;width:100%;flex-direction: column-reverse;">
         {% for message in messages %}
             <div class="sp-message sp-message-{{ message.id }}" ondblclick="$(this).toggleClass('message-hidden')">
                 <div class="sp-flex">
@@ -109,6 +109,6 @@
             });
         });
         var ul = document.getElementById('all-messages-container').children;
-        for(var child in ul) { if(ul[child] instanceof Element || ul[child] instanceof HTMLDocument) { ul[child].classList.add('message-hidden'); } }
+        for(var child in ul) { if((ul[child] instanceof Element || ul[child] instanceof HTMLDocument) && child <= (ul.length - 4)) { ul[child].classList.add('message-hidden'); } }
     </script>
 {% endblock %}
